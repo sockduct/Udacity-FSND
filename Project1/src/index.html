@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+  <head lang="en">
+    <meta charset="utf-8">
+
+    <!-- /Not sure about this\ -->
+    <!--meta http-equiv="Content-Type" content="text/html; charset=windows-1252"-->
+
+    <!-- /Telling IE to use best engine available\ -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- /For mobile, how to display page when it loads\ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Project 1 - My Portolio Site</title>
+
+    <!-- External Reference Section: -->
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700" rel="stylesheet">
+
+    <!-- Cascading Style Sheets Section: -->
+    <!-- Order important here - first apply bootstrap, then tweak (and possibly override) with our styles -->
+    <!-- The "minified" version removes whitespace and loads faster but harder to develop and debug with -->
+    <!--link rel="stylesheet" href="css/bootstrap.min.css"-->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!--Per Udacity FEND Style Guide - don't use type="text/css"-->
+    <!--link href="css/main.css" rel="stylesheet" type="text/css"-->
+
+    <!-- JavaScript Section: -->
+    <!-- Bootstrap JavaScript Libraries, JQuery must appear first (dependency) -->
+    <!--script src="js/jquery-3.1.1.min.js"></script-->
+    <!--script src="js/bootstrap.min.js"></script-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="grid">
+        <header class="row">
+          <div class="col-3 header-image-container">
+            <img class="header-image" src="img/logo.png" alt="My Logo">
+          </div>
+          <div class="col-9 header-text">
+            <h1>James R. Small</h1>
+            <h3>Full Stack Engineer</h3>
+          </div>
+        </header>
+        <nav class="row">
+          <hr>
+        </nav>
+        <section class="row">
+          <img class="col-12" src="img/Flash_Pipeline_Entrance.jpg" alt="Site Entrance">
+          <h2 class="col-12">Featured Work</h2>
+        </section>
+        <section class="row projects">
+          <div class="col-4">
+            <img src="img/movie-trailer.jpg" alt="Movie Trailers">
+            <h3>Movie Trailers</h3>
+            <a href="https://github.com/sockduct/UD036">GitHub.com/sockduct/UD036</a>
+          </div>
+          <div class="col-4">
+            <img src="img/question-mark.jpg" alt="Project 2">
+            <h3>Project 2</h3>
+            <a href="https://github.com/sockduct/TBD">GitHub.com/sockduct/TBD</a>
+          </div>
+          <div class="col-4">
+            <img src="img/question-mark.jpg" alt="Project 3">
+            <h3>Project 3</h3>
+            <a href="https://github.com/sockduct/TBDF">GitHub.com/sockduct/TBD</a>
+          </div>
+        </section>
+        <footer class="row">
+          Social Media TBD...
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>
