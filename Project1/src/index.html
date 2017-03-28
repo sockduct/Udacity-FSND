@@ -15,7 +15,9 @@
 
     <!-- External Reference Section: -->
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700" rel="stylesheet">
+    <!--link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700" rel="stylesheet"-->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400|Roboto:300,400" rel="stylesheet">
+    <link rel="stylesheet" href="http://weloveiconfonts.com/api/?family=zocial">
 
     <!-- Cascading Style Sheets Section: -->
     <!-- Order important here - first apply bootstrap, then tweak (and possibly override) with our styles -->
@@ -40,35 +42,57 @@
           </div>
           <div class="col-9 header-text">
             <h1>James R. Small</h1>
-            <h3>Full Stack Engineer</h3>
+            <h3 class="header3">Full Stack Engineer</h3>
           </div>
+          <!--div class="col-12 header-sep">
+            <hr>
+          </div-->
         </header>
         <nav class="row">
           <hr>
         </nav>
-        <section class="row">
-          <img class="col-12" src="img/Flash_Pipeline_Entrance.jpg" alt="Site Entrance">
+        <section class="row main">
+          <picture class="col-12">
+            <source media="(max-width: 499px)"
+              srcset="img/Flash_Pipeline_Entrance-small.jpg">
+            <img src="img/Flash_Pipeline_Entrance.jpg" alt="Site Entrance">
+          </picture>
           <h2 class="col-12">Featured Work</h2>
+        <!--/section-->
+          <section class="row projects">
+            <div class="project">
+              <img src="img/movie-trailer.jpg" alt="Movie Trailers">
+              <h3>Movie Trailers</h3>
+              <a class="project-a" href="https://github.com/sockduct/UD036">GitHub.com/sockduct/UD036</a>
+            </div>
+            <div class="project">
+              <img src="img/question-mark-300w2.jpg" alt="Project 2">
+              <h3>Project 2</h3>
+              <a class="project-a" href="https://github.com/sockduct/TBD">GitHub.com/sockduct/TBD</a>
+            </div>
+            <div class="project">
+              <img src="img/question-mark-300w2.jpg" alt="Project 3">
+              <h3>Project 3</h3>
+              <a class="project-a" href="https://github.com/sockduct/TBDF">GitHub.com/sockduct/TBD</a>
+            </div>
+          </section>
         </section>
-        <section class="row projects">
-          <div class="col-4">
-            <img src="img/movie-trailer.jpg" alt="Movie Trailers">
-            <h3>Movie Trailers</h3>
-            <a href="https://github.com/sockduct/UD036">GitHub.com/sockduct/UD036</a>
-          </div>
-          <div class="col-4">
-            <img src="img/question-mark.jpg" alt="Project 2">
-            <h3>Project 2</h3>
-            <a href="https://github.com/sockduct/TBD">GitHub.com/sockduct/TBD</a>
-          </div>
-          <div class="col-4">
-            <img src="img/question-mark.jpg" alt="Project 3">
-            <h3>Project 3</h3>
-            <a href="https://github.com/sockduct/TBDF">GitHub.com/sockduct/TBD</a>
-          </div>
-        </section>
+        <div class="col-12 footer-sep">
+          <hr>
+        </div>
         <footer class="row">
-          Social Media TBD...
+          <div class="social footer-sm">
+            <a href="https://www.linkedin.com/in/jamesrsmall" id="footer-a" class="zocial-linkedin">Connect with me on LinkedIn</a>
+          </div>
+          <div class="social footer-sm">
+            <a href="https://github.com/sockduct" id="footer-a" class="zocial-github">Check out my GitHub Repos</a>
+          </div>
+          <div class="social footer-sm">
+            <a href="https://www.facebook.com/public/james.small.372" id="footer-a" class="zocial-facebook">Follow me on Facebook</a>
+          </div>
+          <div class="social footer-sm">
+            <a href="https://twitter.com/sockduct" id="footer-a" class="zocial-twitter">Follow me on Twitter</a>
+          </div>
         </footer>
       </div>
     </div>

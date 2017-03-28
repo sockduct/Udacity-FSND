@@ -1,7 +1,7 @@
 /* CSS - Basic Stylesheet for Grid Layout: */
 
-* {
-    border: 1px solid red !important;
+header, footer, img, .main {
+    border: 1px solid #7d97ad;
 }
 
 * {
@@ -9,10 +9,6 @@
     -moz-box-sizing: border-box;
     -ms-box-sizing: border-box;
     box-sizing: border-box;
-}
-
-* {
-    font-family: 'Roboto Slab', serif;
 }
 
 .grid {
@@ -24,7 +20,7 @@
 .row {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     width: 100%;
 }
 
@@ -78,13 +74,42 @@
 
 h1 {
     color: blue;
+    margin-bottom: 0;
+}
+
+header, section {
+    font-family: 'Roboto Slab', serif;
+}
+
+h3 {
+    margin-bottom: 0.2em;
+    margin-top: 0.15em;
+}
+
+.header3 {
+    margin-bottom: 1.25em;
+}
+
+hr {
+    border: solid 2px;
+    color:  #7d97ad;
+    height: 3px;
+    width: 100%;
+}
+
+footer {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+}
+
+header, footer, .main {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
 }
 
 .header-text {
-    text-align: right;
     padding-left: 20px;
-    /* But only do this for small viewports:;
-    font-size: 4vw; */
+    padding-right: 10px;
+    text-align: right;
 }
 
 .header-image-container {
@@ -98,8 +123,44 @@ h1 {
     top: 0;
 }
 
+.main {
+    display: block;
+}
+
 .projects {
     text-align: center;
+}
+
+.project-a {
+    color: #000;
+    line-height: 2em;
+    position: relative;
+    text-decoration: none;
+}
+
+.project-a:hover {
+    color: #000;
+}
+
+.project-a:before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #000;
+    visibility: hidden;
+    -webkit-transform: scaleX(0);
+    transform: scaleX(0);
+    -webkit-transition: all 0.3s ease-in-out 0s;
+    transition: all 0.3s ease-in-out 0s;
+}
+
+.project-a:hover:before {
+    visibility: visible;
+    -webkit-transform: scaleX(1);
+    transform: scaleX(1);
 }
 
 img, embed, object, video {
@@ -107,19 +168,81 @@ img, embed, object, video {
 }
 
 nav a, button {
-    min-width: 48px;
     min-height: 48px;
+    min-width: 48px;
 }
 
-@media screen and (max-width: 424px) {
+.footer-sm {
+    margin: auto;
+    margin-bottom: 0.25em;
+    margin-top: 0.25em;
+    text-align: center;
+    width: 100%;
+}
+
+#footer-a {
+    color: #02b3e4;
+}
+
+#footer-a:hover {
+    text-decoration: underline;
+}
+
+[class*="zocial-"]:before {
+  color: black;
+  display: inline-block;
+  font-family: 'zocial', sans-serif;
+  text-shadow: 3px 3px 3px #aaa;
+  width: 2em;
+}
+
+a:hover [class*="zocial-"]:before {
+  color: #3d85c6;
+}
+
+a {
+    text-decoration: none;
+}
+
+div#social a {
+  margin: 0 1em 0 0;
+}
+
+div#social a:last-of-type {
+  margin: 0;
+}
+
+div#social {
+  line-height: 2em;
+}
+
+@media screen and (max-width: 499px) {
     body {
         background-color: green;
     }
+    .project {
+        width: 100%;
+    }
+    h1 {
+        font-size: 1.5em;
+    }
+    h3 {
+        font-size: 1.0em;
+    }
 }
 
-@media screen and (min-width: 425px) and (max-width: 799px) {
+@media screen and (min-width: 575px) {
+    .footer-sm {
+        width: 50%;
+    }
+}
+
+@media screen and (min-width: 500px) and (max-width: 799px) {
     body {
         background-color: yellow;
+    }
+    .project {
+        width: 50%;
     }
 }
 
@@ -127,10 +250,25 @@ nav a, button {
     body {
         background-color: orange;
     }
+    .project {
+        width: 33.33%;
+    }
+}
+
+@media screen and (min-width: 825px) {
+    .footer-sm {
+        width: 33.33%;
+    }
 }
 
 @media screen and (min-width: 1001px) {
     body {
         background-color: red;
+    }
+    .project {
+        width: 33.33%;
+    }
+    .footer-sm {
+        width: 25%;
     }
 }
