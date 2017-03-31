@@ -77,6 +77,10 @@ h1 {
     margin-bottom: 0;
 }
 
+h2 {
+    padding-left:10px;
+}
+
 header, section {
     font-family: 'Roboto Slab', serif;
 }
@@ -238,18 +242,18 @@ div#social {
 }
 
 @media screen and (min-width: 500px) and (max-width: 799px) {
-    body {
+    /* body {
         background-color: yellow;
-    }
+    } */
     .project {
         width: 50%;
     }
 }
 
 @media screen and (min-width: 800px) and (max-width: 1000px) {
-    body {
+    /* body {
         background-color: orange;
-    }
+    } */
     .project {
         width: 33.33%;
     }
@@ -262,9 +266,9 @@ div#social {
 }
 
 @media screen and (min-width: 1001px) {
-    body {
+    /* body {
         background-color: red;
-    }
+    } */
     .project {
         width: 33.33%;
     }
