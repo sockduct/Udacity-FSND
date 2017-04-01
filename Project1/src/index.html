@@ -2,27 +2,25 @@
 <html>
   <head lang="en">
     <meta charset="utf-8">
-
-    <!-- /Not sure about this\ -->
+    <!-- /Below is HTML4.01 way, above is HTML5 way\ -->
     <!--meta http-equiv="Content-Type" content="text/html; charset=windows-1252"-->
 
     <!-- /Telling IE to use best engine available\ -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- /For mobile, how to display page when it loads\ -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- /Do I want this?\ -->
-    <!--meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalabe=yes"-->
 
     <title>Project 1 - My Portolio Site</title>
 
     <!-- External Reference Section: -->
-    <!-- Fonts -->
-    <!--link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700" rel="stylesheet"-->
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400|Roboto:300,400" rel="stylesheet">
+    <!-- Fonts - For Multiple Google Fonts, replace "|" with "%7C" -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400%7CRoboto:300,400" rel="stylesheet">
     <link rel="stylesheet" href="http://weloveiconfonts.com/api/?family=zocial">
 
     <!-- Cascading Style Sheets Section: -->
-    <!-- Order important here - first apply bootstrap, then tweak (and possibly override) with our styles -->
+    <!-- Order important here:
+         First apply framework
+         Then tweak (and possibly override) with our styles -->
     <!-- The "minified" version removes whitespace and loads faster but harder to develop and debug with -->
     <!--link rel="stylesheet" href="css/bootstrap.min.css"-->
     <link rel="stylesheet" href="css/styles.css">
@@ -31,9 +29,12 @@
     <!--link href="css/main.css" rel="stylesheet" type="text/css"-->
 
     <!-- JavaScript Section: -->
-    <!-- Bootstrap JavaScript Libraries, JQuery must appear first (dependency) -->
+    <!-- Framework JavaScript Libraries
+         Mind dependencies - e.g., JQuery must appear first with Bootstrap -->
     <!--script src="js/jquery-3.1.1.min.js"></script-->
     <!--script src="js/bootstrap.min.js"></script-->
+    <!-- Tried to load JavaScript to allow Modal - but doesn't work, have to embed script at bottom -->
+    <!--script src="js/modal.js"></script-->
   </head>
   <body>
     <div class="container">
@@ -43,39 +44,55 @@
             <img class="header-image" src="img/logo.png" alt="My Logo">
           </div>
           <div class="col-9 header-text">
-            <h1>James R. Small</h1>
-            <h3 class="header3">Full Stack Engineer</h3>
+            <h1 class="header-name">James R. Small</h1>
+            <h3 class="header-title">Full Stack Engineer</h3>
           </div>
-          <!--div class="col-12 header-sep">
-            <hr>
-          </div-->
         </header>
         <nav class="row">
           <hr>
         </nav>
         <section class="row main">
+          <!-- Future - use iframe or modal:
+          <div class="col-12 flash-trailer-div">
+            <iframe width="854" height="480" name="flash-trailer"
+              src="https://www.youtube.com/embed/Yj0l7iGKh8g">
+            </iframe>
+          </div>
+          -->
           <picture class="col-12">
             <source media="(max-width: 499px)"
               srcset="img/Flash_Pipeline_Entrance-small.jpg">
-            <img src="img/Flash_Pipeline_Entrance.jpg" alt="Site Entrance">
+            <img id="fpeModal" src="img/Flash_Pipeline_Entrance.jpg" alt="Site Entrance">
           </picture>
+          <!-- My Modal which includes regular paragraph text to meet the rubric! -->
+          <!-- Note: Not sure if JavaScript can handle "-" so using CamelCase -->
+          <div id="descrModal" class="modal">
+            <div class="modal-content">
+              <span class="close" onclick="document.getElementById('descrModal').style.display='none'">&times;</span>
+              <p>This is the entrace to the pipeline from The CW's The Flash TV Series. Highly
+                 recommended for viewing on treadmill runs from your tablet. After all, if Barry
+                 can run 100s of Miles Per Hour, what's the big deal about upping your speed another
+                 tenth of a MPH?</p>
+            </div>
+          </div>
           <h2 class="col-12">Featured Work</h2>
-        <!--/section-->
           <section class="row projects">
             <div class="project">
-              <img src="img/movie-trailer.jpg" alt="Movie Trailers">
-              <h3>Movie Trailers</h3>
-              <a class="project-a" href="https://github.com/sockduct/UD036">GitHub.com/sockduct/UD036</a>
+              <a href="movies.html">
+                <img class="project-image" src="img/movie-trailer.jpg" alt="Movie Trailers">
+              </a>
+              <h3 class="project-title">Movie Trailers</h3>
+              <a class="project-link" href="https://github.com/sockduct/UD036">GitHub.com/sockduct/UD036</a>
             </div>
             <div class="project">
-              <img src="img/question-mark-300w2.jpg" alt="Project 2">
-              <h3>Project 2</h3>
-              <a class="project-a" href="https://github.com/sockduct/TBD">GitHub.com/sockduct/TBD</a>
+              <img class="project-image" src="img/question-mark-300w2.jpg" alt="Project 2">
+              <h3 class="project-title">Project 2</h3>
+              <a class="project-link" href="https://github.com/sockduct/TBD">GitHub.com/sockduct/TBD</a>
             </div>
             <div class="project">
-              <img src="img/question-mark-300w2.jpg" alt="Project 3">
-              <h3>Project 3</h3>
-              <a class="project-a" href="https://github.com/sockduct/TBDF">GitHub.com/sockduct/TBD</a>
+              <img class="project-image" src="img/question-mark-300w2.jpg" alt="Project 3">
+              <h3 class="project-title">Project 3</h3>
+              <a class="project-link" href="https://github.com/sockduct/TBDF">GitHub.com/sockduct/TBD</a>
             </div>
           </section>
         </section>
@@ -84,19 +101,46 @@
         </div>
         <footer class="row">
           <div class="social footer-sm">
-            <a href="https://www.linkedin.com/in/jamesrsmall" id="footer-a" class="zocial-linkedin">Connect with me on LinkedIn</a>
+            <a href="https://www.linkedin.com/in/jamesrsmall" class="footer-link zocial-linkedin">Connect with me on LinkedIn</a>
           </div>
           <div class="social footer-sm">
-            <a href="https://github.com/sockduct" id="footer-a" class="zocial-github">Check out my GitHub Repos</a>
+            <a href="https://github.com/sockduct" class="footer-link zocial-github">Check out my GitHub Repos</a>
           </div>
           <div class="social footer-sm">
-            <a href="https://www.facebook.com/public/james.small.372" id="footer-a" class="zocial-facebook">Follow me on Facebook</a>
+            <a href="https://www.facebook.com/public/james.small.372" class="footer-link zocial-facebook">Follow me on Facebook</a>
           </div>
           <div class="social footer-sm">
-            <a href="https://twitter.com/sockduct" id="footer-a" class="zocial-twitter">Follow me on Twitter</a>
+            <a href="https://twitter.com/sockduct" class="footer-link zocial-twitter">Follow me on Twitter</a>
           </div>
         </footer>
       </div>
     </div>
+    <!-- JavaScript Code to allow use of a modal: -->
+    <!-- Note: Tried loading it from separate file, but doesn't work... -->
+    <script>
+      // Get the modal and relevant image
+      var modal = document.getElementById("descrModal");
+      var img = document.getElementById("fpeModal");
+
+      // When the user clicks on the image, open the modal
+      img.onclick = function() {
+        modal.style.display = "block";
+      }
+
+      // Get the <span> element that closes the modal
+      var span = document.getElementsByClassName("close")[0];
+
+      // When the user clicks on <span> (x), close the modal
+      span.onclick = function() {
+        modal.style.display = "none";
+      }
+
+      // When the user clicks anywhere outside of the modal, close it
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      }
+    </script>
   </body>
 </html>
