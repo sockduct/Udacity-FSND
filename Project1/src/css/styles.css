@@ -163,6 +163,7 @@ footer {
     max-width: 95%;
 }
 
+/* Based on example I found on the web but don't remember where */
 .project-image:hover{
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
@@ -184,6 +185,7 @@ footer {
     color: #000;
 }
 
+/* Based on example I found on the web but don't remember where */
 .project-link:before {
     background-color: #000;
     bottom: 0;
@@ -200,6 +202,7 @@ footer {
     transition: all 0.3s ease-in-out 0s;
 }
 
+/* Based on example I found on the web but don't remember where */
 .project-link:hover:before {
     visibility: visible;
     -ms-transform: scaleX(1);
@@ -265,6 +268,7 @@ div#social {
   line-height: 2em;
 }
 
+/* Modal CSS based on example from w3schools.com */
 #fpeModal:hover {opacity: 0.8;}
 
 /* The Modal (background) */
