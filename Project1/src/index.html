@@ -7,6 +7,7 @@
 
     <!-- /Telling IE to use best engine available\ -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
     <!-- /For mobile, how to display page when it loads\ -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -15,6 +16,8 @@
     <!-- External Reference Section: -->
     <!-- Fonts - For Multiple Google Fonts, replace "|" with "%7C" -->
     <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400%7CRoboto:300,400" rel="stylesheet">
+    <!-- Note:  Would like to replace with @font-face in CSS as this interface doesn't support https which results in Chrome and
+                possibly other browsers blocking it: -->
     <link rel="stylesheet" href="http://weloveiconfonts.com/api/?family=zocial">
     <!-- Not sure how to replace the above with a secure source - e.g., this fails:
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/css-social-buttons/1.3.0/css/zocial.min.css" -->
@@ -26,7 +29,6 @@
     <!-- The "minified" version removes whitespace and loads faster but harder to develop and debug with -->
     <!--link rel="stylesheet" href="css/bootstrap.min.css"-->
     <link rel="stylesheet" href="css/styles.css">
-
     <!--Per Udacity FEND Style Guide - don't use type="text/css"-->
     <!--link href="css/main.css" rel="stylesheet" type="text/css"-->
 
@@ -38,6 +40,7 @@
     <!-- Tried to load JavaScript to allow Modal - but doesn't work, have to embed script at bottom -->
     <!--script src="js/modal.js"></script-->
   </head>
+
   <body>
     <div class="container">
       <div class="grid">
@@ -45,14 +48,17 @@
           <div class="col-3 header-image-container">
             <img class="header-image" src="img/logo.png" alt="My Logo">
           </div>
+
           <div class="col-9 header-text">
             <h1 class="header-name">James R. Small</h1>
             <h3 class="header-title">Full Stack Engineer</h3>
           </div>
         </header>
-        <nav class="row">
+
+        <nav class="row top">
           <hr>
         </nav>
+
         <section class="row main">
           <!-- To Do - use iframe or modal:
                Consider using element queries to make size relative
@@ -62,11 +68,18 @@
             </iframe>
           </div>
           -->
+          <!-- Note:  Using picture element because the pictures are different.  The -small
+                      picture is a cropped version for small screens, not just a different
+                      resolution.  From the link provided by the instructor (https://css-tricks.com/responsive-images-youre-just-changing-resolutions-use-srcset/), srcset
+                      appears more appropriate only if the images are the same. The course
+                      video the instructor left (https://www.udacity.com/course/viewer#!/c-ud882/l-3574748851/m-3888228996) results in a 404 error for me so I didn't get to
+                      watch that.  Please let me know if my thought here is wrong. -->
           <picture class="col-12">
             <source media="(max-width: 499px)"
               srcset="img/Flash_Pipeline_Entrance-small.jpg">
             <img id="fpeModal" src="img/Flash_Pipeline_Entrance.jpg" alt="Site Entrance">
           </picture>
+
           <!-- My Modal which includes regular paragraph text to meet the rubric! -->
           <!-- Note: Not sure if JavaScript can handle "-" so using CamelCase -->
           <!-- Modal based on example from w3schools.com - modal boxes/images -->
@@ -79,46 +92,56 @@
                  tenth of a MPH?</p>
             </div>
           </div>
+
           <h2 class="col-12">Featured Work</h2>
+
           <section class="row projects">
             <div class="project">
               <a href="movies.html">
                 <img class="project-image" src="img/movie-trailer.jpg" alt="Movie Trailers">
               </a>
               <h3 class="project-title">Movie Trailers</h3>
-              <a class="project-link" href="https://github.com/sockduct/UD036">GitHub.com/sockduct/UD036</a>
+              <a class="project-link" href="https://github.com/sockduct/UD036" target="_blank">GitHub.com/sockduct/UD036</a>
             </div>
+
             <div class="project">
               <img class="project-image" src="img/question-mark-300w2.jpg" alt="Project 2">
               <h3 class="project-title">Project 2</h3>
-              <a class="project-link" href="https://github.com/sockduct/TBD">GitHub.com/sockduct/TBD</a>
+              <a class="project-link" href="https://github.com/sockduct/TBD" target="_blank">GitHub.com/sockduct/TBD</a>
             </div>
+
             <div class="project">
               <img class="project-image" src="img/question-mark-300w2.jpg" alt="Project 3">
               <h3 class="project-title">Project 3</h3>
-              <a class="project-link" href="https://github.com/sockduct/TBDF">GitHub.com/sockduct/TBD</a>
+              <a class="project-link" href="https://github.com/sockduct/TBD" target="_blank">GitHub.com/sockduct/TBD</a>
             </div>
           </section>
         </section>
+
         <div class="col-12 footer-sep">
           <hr>
         </div>
+
         <footer class="row bottom">
           <div class="social footer-sm">
-            <a href="https://www.linkedin.com/in/jamesrsmall" class="footer-link zocial-linkedin">Connect with me on LinkedIn</a>
+            <a href="https://www.linkedin.com/in/jamesrsmall" target="_blank" class="footer-link zocial-linkedin">Connect with me on LinkedIn</a>
           </div>
+
           <div class="social footer-sm">
-            <a href="https://github.com/sockduct?tab=repositories" class="footer-link zocial-github">Check out my GitHub Repos</a>
+            <a href="https://github.com/sockduct?tab=repositories" target="_blank" class="footer-link zocial-github">Check out my GitHub Repos</a>
           </div>
+
           <div class="social footer-sm">
-            <a href="https://www.facebook.com/public/james.small.372" class="footer-link zocial-facebook">Follow me on Facebook</a>
+            <a href="https://www.facebook.com/public/james.small.372" target="_blank" class="footer-link zocial-facebook">Follow me on Facebook</a>
           </div>
+
           <div class="social footer-sm">
-            <a href="https://twitter.com/sockduct" class="footer-link zocial-twitter">Follow me on Twitter</a>
+            <a href="https://twitter.com/sockduct" target="_blank" class="footer-link zocial-twitter">Follow me on Twitter</a>
           </div>
         </footer>
       </div>
     </div>
+
     <!-- JavaScript Code to allow use of a modal: -->
     <!-- Note: Tried loading it from separate file, but doesn't work... -->
     <script>

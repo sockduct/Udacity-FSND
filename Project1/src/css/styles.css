@@ -1,6 +1,33 @@
 /* CSS - Basic Stylesheet for Grid Layout: */
 
-header, footer, img, .main {
+/* Load zocial font locally - preferable to using web API call below because this service isn't
+   available via https which results in Chrome (and possible other browsers) blocking it.
+   <link rel="stylesheet" href="http://weloveiconfonts.com/api/?family=zocial">
+
+   Syntax from https://css-tricks.com/snippets/css/using-font-face/
+
+   But can't figure out how to get this to work...  :-(
+*/
+/*
+@font-face {
+    font-family: 'zocial';
+    src: url('../font/zocial/zocial-regular-webfont.eot'); /* IE9 Compat Modes */
+/*    src: url('../font/zocial/zocial-regular-webfont.woff') format('woff'), /* Pretty Modern Browsers */
+/*         url('../font/zocial/zocial-regular-webfont.ttf')  format('truetype'), /* Safari, Android, iOS */
+/*         url('../font/zocial/zocial-regular-webfont.svg#svgFontName') format('svg'); /* Legacy iOS */
+/*}
+*/
+/*
+@font-face {
+    font-family: "zocial";
+    src: url('zocial.woff') format('woff');
+}
+*/
+
+header,
+footer,
+img,
+.main {
     border: 1px solid #7d97ad;
 }
 
@@ -25,47 +52,47 @@ header, footer, img, .main {
 }
 
 .col-1 {
-    width: 8.33%;
+    width: calc(100% / 12);
 }
 
 .col-2 {
-    width: 16.66%;
+    width: calc(100% /12 * 2);
 }
 
 .col-3 {
-    width: 25%;
+    width: calc(100% /12 * 3);
 }
 
 .col-4 {
-    width: 33.33%;
+    width: calc(100% /12 * 4);
 }
 
 .col-5 {
-    width: 41.66%;
+    width: calc(100% /12 * 5);
 }
 
 .col-6 {
-    width: 50%;
+    width: calc(100% /12 * 6);
 }
 
 .col-7 {
-    width: 58.33%;
+    width: calc(100% /12 * 7);
 }
 
 .col-8 {
-    width: 66.66%;
+    width: calc(100% /12 * 8);
 }
 
 .col-9 {
-    width: 75%;
+    width: calc(100% /12 * 9);
 }
 
 .col-10 {
-    width: 83.33%;
+    width: calc(100% /12 * 10);
 }
 
 .col-11 {
-    width: 91.66%;
+    width: calc(100% /12 * 11);
 }
 
 .col-12 {
@@ -81,8 +108,9 @@ h2 {
     padding-left:10px;
 }
 
-header, section {
-    font-family: 'Roboto Slab', serif;
+header,
+section {
+    font-family: "Roboto Slab", serif;
 }
 
 h3 {
@@ -113,15 +141,17 @@ iframe {
 }
 */
 
-header, footer, .main {
+header,
+footer,
+.main {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
 }
 
 footer {
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     font-weight: 300;
     /* Tried to shorten above to below but results in Chrome complaining about invalid property value:
-    font: 300, 'Roboto', sans-serif; */
+    font: 300, "Roboto", sans-serif; */
 }
 
 .header-text {
@@ -141,9 +171,11 @@ footer {
     top: 0;
 }
 
+/* Thought I needed this for image alignment, but doesn't seem like it now:
 .main {
     display: block;
 }
+*/
 
 .projects {
     text-align: center;
@@ -210,12 +242,16 @@ footer {
     transform: scaleX(1);
 }
 
-img, embed, object, video {
+img,
+embed,
+object,
+video {
     max-height: 100%;
     max-width: 100%;
 }
 
-nav a, button {
+nav a,
+button {
     min-height: 48px;
     min-width: 48px;
 }
@@ -243,7 +279,7 @@ nav a, button {
 [class*="zocial-"]:before {
   color: black;
   display: inline-block;
-  font-family: 'zocial', sans-serif;
+  font-family: "zocial", sans-serif;
   text-shadow: 3px 3px 3px #aaa;
   width: 2em;
 }
