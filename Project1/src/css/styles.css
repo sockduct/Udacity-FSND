@@ -1,5 +1,10 @@
 /* CSS - Basic Stylesheet for Grid Layout: */
 
+/* To Do:
+   * Check out BEM (Block, Element, Modifiers) naming style
+   * Fix Zocial font so loads from CDN or locally using below or similar
+*/
+
 /* Load zocial font locally - preferable to using web API call below because this service isn't
    available via https which results in Chrome (and possible other browsers) blocking it.
    <link rel="stylesheet" href="http://weloveiconfonts.com/api/?family=zocial">
@@ -7,6 +12,9 @@
    Syntax from https://css-tricks.com/snippets/css/using-font-face/
 
    But can't figure out how to get this to work...  :-(
+
+   Also, Udacity Style Guide says, "Do not use quotation marks in URI values (url())."  Does
+   that mean use single quotes or no quotes???
 */
 /*
 @font-face {

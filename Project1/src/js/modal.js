@@ -1,7 +1,5 @@
-// Get the modal
+// Get reference to the modal and relevant image
 var modal = document.getElementById('descrModal');
-
-// Image setup
 var img = document.getElementById('fpeModal');
 
 // When the user clicks on the image, open the modal
@@ -9,7 +7,7 @@ img.onclick = function() {
     modal.style.display = "block";
 }
 
-// Get the <span> element that closes the modal
+// Get reference to the <span> element that closes the modal
 var span = document.getElementsByClassName("close")[0];
 
 // When the user clicks on <span> (x), close the modal
@@ -23,3 +21,4 @@ window.onclick = function(event) {
         modal.style.display = "none";
     }
 }
+
