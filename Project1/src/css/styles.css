@@ -16,21 +16,15 @@
    Also, Udacity Style Guide says, "Do not use quotation marks in URI values (url())."  Does
    that mean use single quotes or no quotes???
 */
-/*
-@font-face {
-    font-family: 'zocial';
-    src: url('../font/zocial/zocial-regular-webfont.eot'); /* IE9 Compat Modes */
-/*    src: url('../font/zocial/zocial-regular-webfont.woff') format('woff'), /* Pretty Modern Browsers */
-/*         url('../font/zocial/zocial-regular-webfont.ttf')  format('truetype'), /* Safari, Android, iOS */
-/*         url('../font/zocial/zocial-regular-webfont.svg#svgFontName') format('svg'); /* Legacy iOS */
-/*}
-*/
-/*
 @font-face {
     font-family: "zocial";
-    src: url('zocial.woff') format('woff');
+    src: url('../font/zocial/zocial-regular-webfont.eot'); /* IE9 Compat Modes */
+    src: url('../font/zocial/zocial-regular-webfont.woff') format('woff'), /* Pretty Modern Browsers */
+         url('../font/zocial/zocial-regular-webfont.ttf') format('truetype'), /* Safari, Android, iOS */
+         url('../font/zocial/zocial-regular-webfont.svg#svgFontName') format('svg'); /* Legacy iOS */
+    font-weight: normal;
+    font-style: normal;
 }
-*/
 
 header,
 footer,
@@ -283,6 +277,12 @@ button {
 .footer-link:hover {
     text-decoration: underline;
 }
+
+/* Zocial Icon Font Setup: */
+.zocial-github:before {content: "g";}
+.zocial-facebook:before {content: "f";}
+.zocial-linkedin:before {content: "L";}
+.zocial-twitter:before {content: "T";}
 
 [class*="zocial-"]:before {
   color: black;
