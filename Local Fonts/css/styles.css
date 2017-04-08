@@ -1,0 +1,92 @@
+/* CSS - Basic Stylesheet for Grid Layout: */
+
+/* Load zocial font locally - preferable to using web API call below because this service isn't
+   available via https which results in Chrome (and possible other browsers) blocking it.
+   <link rel="stylesheet" href="http://weloveiconfonts.com/api/?family=zocial">
+
+   Syntax from https://css-tricks.com/snippets/css/using-font-face/
+
+   But can't figure out how to get this to work...  :-(
+
+   Also, Udacity Style Guide says, "Do not use quotation marks in URI values (url())."  Does
+   that mean use single quotes or no quotes???
+*/
+/*
+@font-face {
+    font-family: 'zocial';
+    src: url('../font/zocial/zocial-regular-webfont.eot'); /* IE9 Compat Modes */
+/*    src: url('../font/zocial/zocial-regular-webfont.woff') format('woff'), /* Pretty Modern Browsers */
+/*         url('../font/zocial/zocial-regular-webfont.ttf')  format('truetype'), /* Safari, Android, iOS */
+/*         url('../font/zocial/zocial-regular-webfont.svg#svgFontName') format('svg'); /* Legacy iOS */
+/*}
+*/
+
+@font-face {
+    font-family: "zocial";
+    src: url('../font/zocial/zocial-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "aclonica";
+    src: url('../font/aclonica/aclonica-webfont.woff2') format('woff2'),
+         url('../font/aclonica/aclonica-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+body {
+    background-image: url('../img/background.jpg');
+    background-color: #cccccc;
+}
+
+.footer-sm {
+    /* TRouBLe - Top, Right, Bottom, Left */
+    margin: 0.25em auto 0.25em auto;
+    text-align: center;
+    width: 100%;
+/*    font-family: "Roboto", sans-serif; */
+    font-family: "aclonica";
+    /* , sans-serif; */
+/*    font-weight: 300; */
+}
+
+.footer-p {
+    /* color: #02b3e4; */
+    color: blue;
+}
+
+.footer-p:hover {
+    text-decoration: underline;
+}
+
+/* Zocial setup: */
+.zocial-github:before {content: "g";}
+.zocial-facebook:before {content: "f";}
+.zocial-linkedin:before {content: "L";}
+.zocial-twitter:before {content: "T";}
+
+[class*="zocial-"]:before {
+  color: black;
+  display: inline-block;
+  font-family: "zocial", sans-serif;
+  text-shadow: 3px 3px 3px #aaa;
+  width: 2em;
+}
+
+p:hover [class*="zocial-"]:before {
+  color: #3d85c6;
+}
+
+p {
+    text-decoration: none;
+}
+
