@@ -21,16 +21,6 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 # Jinja setup and look for templates in template_dir
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
 
-form_html = '''
-<form>
-    <h2>Add a Food</h2>
-    <input type='text' name='food'>
-    %s
-    <button>Add</button>
-</form>
-'''
-# <input...\n%s\n<button...
-
 hidden_html = '''
 <input type='hidden' name='food' value='%s'>
 '''
@@ -65,20 +55,25 @@ class Handler(webapp2.RequestHandler):
 
 class MainPage(Handler):
     def get(self):
+        n = self.request.get('n')
+        if n and n.isdigit():
+            n = int(n)
+        self.render('shopping_list.html', n=n)
+
         # self.write('Hello, Project 2!')
         # self.write(form_html)
-        output = form_html
-        output_hidden = ''
+        #output = form_html
+        #output_hidden = ''
         # items will be a list of all the food parameters in the URL
-        items = self.request.get_all('food')
-        if items:
-            output_items = ''
-            for item in items:
-                output_hidden += hidden_html % item
-                output_items += item_html % item
-            output_shopping = shopping_list_html % output_items
-            output += output_shopping
-        output = output % output_hidden
+        #items = self.request.get_all('food')
+        #if items:
+        #    output_items = ''
+        #    for item in items:
+        #        output_hidden += hidden_html % item
+        #        output_items += item_html % item
+        #    output_shopping = shopping_list_html % output_items
+        #    output += output_shopping
+        #output = output % output_hidden
 
         #if items:
         #    output_items = ''
@@ -89,7 +84,7 @@ class MainPage(Handler):
         #    output += output_shopping
         #output = output.format(output_hidden)
 
-        self.write(output)
+        #self.write(output)
 
 app = webapp2.WSGIApplication([('/', MainPage)], debug=True)
 
