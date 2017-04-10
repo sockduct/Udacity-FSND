@@ -19,25 +19,8 @@ import webapp2
 # Jinja template directory will be directory of this file + /templates
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 # Jinja setup and look for templates in template_dir
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
-
-hidden_html = '''
-<input type='hidden' name='food' value='%s'>
-'''
-# <input type='hidden' name='food' value='{}'>
-
-# item_html = '<li>{}</li>'
-item_html = '<li>%s</li>'
-
-shopping_list_html = '''
-<br>
-<br>
-<h2>Shopping List</h2>
-<ul>
-%s
-</ul>
-'''
-# <ul>\n{}\n</ul>
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
+                               autoescape=True)
 
 # Shortcut so can just say self.write vs. self.response.out.write...
 class Handler(webapp2.RequestHandler):
@@ -55,36 +38,16 @@ class Handler(webapp2.RequestHandler):
 
 class MainPage(Handler):
     def get(self):
-        n = self.request.get('n')
-        if n and n.isdigit():
-            n = int(n)
-        self.render('shopping_list.html', n=n)
+        items = self.request.get_all('food')
+        self.render('shopping_list.html', items=items)
 
-        # self.write('Hello, Project 2!')
-        # self.write(form_html)
-        #output = form_html
-        #output_hidden = ''
-        # items will be a list of all the food parameters in the URL
-        #items = self.request.get_all('food')
-        #if items:
-        #    output_items = ''
-        #    for item in items:
-        #        output_hidden += hidden_html % item
-        #        output_items += item_html % item
-        #    output_shopping = shopping_list_html % output_items
-        #    output += output_shopping
-        #output = output % output_hidden
+class FizzBuzzHandler(Handler):
+    def get(self):
+        # 0 below is default value
+        n = self.request.get('n', 0)
+        n = n and int(n)
+        self.render('fizzbuzz.html', n=n)
 
-        #if items:
-        #    output_items = ''
-        #    for item in items:
-        #        output_hidden += hidden_html.format(item)
-        #        output_items += item_html.format(item)
-        #    output_shopping = shopping_list_html.format(output_items)
-        #    output += output_shopping
-        #output = output.format(output_hidden)
-
-        #self.write(output)
-
-app = webapp2.WSGIApplication([('/', MainPage)], debug=True)
+app = webapp2.WSGIApplication([('/', MainPage),
+                               ('/fizzbuzz', FizzBuzzHandler)], debug=True)
 
