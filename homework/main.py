@@ -7,6 +7,9 @@ ANLOWER = 'abcdefghijklmnopqrstuvwxyz'
 ANUPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 VLD_USERNAME = re.compile(r'^[a-zA-Z0-9_-]{3,20}$')
 VLD_PASSWORD = re.compile(r'^.{3,20}$')
+# Instructor states that in his experience (as lead engineer at Reddit) this
+# is good enough.  If the email isn't valid, the email program/tool will
+# catch it.  Definitely some wisdom to his KISS thoughts.
 VLD_EMAIL = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 
 # Jinja template directory will be directory of this file + /templates
@@ -31,6 +34,8 @@ def valid_email(email):
     else:
         return VLD_EMAIL.match(email)
 
+# Note: There's a built-in ROT13 encoder:
+#       str.encode('rot13')
 def rot13(text):
     rot13_text = []
     #for line in text:
@@ -70,14 +75,22 @@ class SignupApp(Handler):
         verify = self.request.get('verify')
         email = self.request.get('email')
 
+        # Instructor created dictionary to keep track of all these, e.g.,
+        # params = dict(usernmae=username, email=email)
+        # He also used a have_error variable instead of my approach which
+        # I think is better...  (Start as false then set if discover error)
         if not valid_username(username):
             username_error = 'Invalid username - Must be from 3-20 characters' + \
                              ' consisting of a-z, A-Z, 0-9, _, -'
+            # params['username_error'] = <above string>
+            # have_error = True
         else:
             username_error = ''
 
         if not valid_password(password):
             password_error = 'Invalid password - Must be from 3-20 characters long'
+            # params['password_error'] = <above string>
+            # have_error = True (etc., not shown again...)
         else:
             password_error = ''
 
@@ -93,6 +106,9 @@ class SignupApp(Handler):
             email_error = ''
 
         if username_error or password_error or verify_error or email_error:
+            # By using a dictionary, can now use the unpack operator and send
+            # everything in the dictionary {self.render('signupapp.html, **params)}
+            # versus the huge list of KVPs below.
             self.render('signupapp.html', username=username, username_error=username_error,
                         password='', password_error=password_error, verify='',
                         verify_error=verify_error, email=email, email_error=email_error)
@@ -111,12 +127,17 @@ class Rot13App(Handler):
 class WelcomeApp(Handler):
     def get(self):
         username = self.request.get('username')
-        self.render('welcome.html', username=username)
+        if not valid_username(username):
+            self.redirect('/signup')
+        else:
+            self.render('welcome.html', username=username)
 
 class MainPage(Handler):
     def get(self):
         self.render('hello.html')
 
+# Note - the URL path can be more than one level deep,
+#        e.g., /hw2/rot13
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/rot13', Rot13App),
                                ('/signup', SignupApp),
