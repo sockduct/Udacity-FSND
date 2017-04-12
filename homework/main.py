@@ -6,8 +6,8 @@ import webapp2
 ANLOWER = 'abcdefghijklmnopqrstuvwxyz'
 ANUPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 VLD_USERNAME = re.compile(r'^[a-zA-Z0-9_-]{3,20}$')
-VLD_PASSWORD = re.compiel(r'^.{3,20}$')
-VLD_EMAIL = re.compile(r'^[\S]+@[\S]+.[\S]+$')
+VLD_PASSWORD = re.compile(r'^.{3,20}$')
+VLD_EMAIL = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 
 # Jinja template directory will be directory of this file + /templates
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -15,7 +15,7 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape=True)
 
-def valid_user(username):
+def valid_username(username):
     return VLD_USERNAME.match(username)
 
 def valid_password(password):
@@ -71,29 +71,33 @@ class SignupApp(Handler):
         email = self.request.get('email')
 
         if not valid_username(username):
-            username_error = 'Invalid username - Must be from 3-20 characters consisting of a-a, A-Z, 0-9, _, -'
+            username_error = 'Invalid username - Must be from 3-20 characters' + \
+                             ' consisting of a-z, A-Z, 0-9, _, -'
         else:
-            username_error = None
+            username_error = ''
+
         if not valid_password(password):
             password_error = 'Invalid password - Must be from 3-20 characters long'
         else:
-            password_error = None
+            password_error = ''
+
         if not valid_verify(password, verify):
             verify_error = "Passwords don't match"
         else:
-            verify_error = None
+            verify_error = ''
+
         if not valid_email(email):
-            email_error = 'Invalid E-mail address - Must be name@domain.domain (e.g., george@yahoo.com)'
+            email_error = 'Invalid E-mail address - Must be name@domain.domain' + \
+                          ' (e.g., george@yahoo.com)'
         else:
-            email_error = None
+            email_error = ''
 
-        if not username_error and not password_error and not verify_error and not
-                email_error:
-            x
+        if username_error or password_error or verify_error or email_error:
+            self.render('signupapp.html', username=username, username_error=username_error,
+                        password='', password_error=password_error, verify='',
+                        verify_error=verify_error, email=email, email_error=email_error)
         else:
-            y
-
-        self.render('signupapp.html', text=text)
+            self.redirect('/welcome?username=' + username)
 
 class Rot13App(Handler):
     def get(self):
@@ -104,11 +108,17 @@ class Rot13App(Handler):
         text = rot13(text)
         self.render('rot13app.html', text=text)
 
+class WelcomeApp(Handler):
+    def get(self):
+        username = self.request.get('username')
+        self.render('welcome.html', username=username)
+
 class MainPage(Handler):
     def get(self):
         self.render('hello.html')
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/rot13', Rot13App),
-                               ('/signup', SignupApp)], debug=True)
+                               ('/signup', SignupApp),
+                               ('/welcome', WelcomeApp)], debug=True)
 

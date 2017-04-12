@@ -4,14 +4,28 @@
 
     <h2>User Signup:</h2>
     <form method="post">
-        <label>Username <input type="text" name="username" value="{username}"></label>
-            <div style="color: red;">{username_error}</div>
-        <label>Password <input type="password" name="password" value="{password}"></label>
-            <div style="color: red;">{password_error}</div>
-        <label>Verify Password <input type="password" name="verify" value="{verify}"></label>
-            <div style="color: red;">{verify_error}</div>
-        <label>E-mail Address <input type="text" name="email" value="{email}"></label>
-            <div style="color: red;">{email_error}</div>
+        <table>
+            <tr>
+                <td class="label">Username</td>
+                <td><input type="text" name="username" value="{{username}}"></td>
+                <td class="error">{{username_error}}</td>
+            </tr>
+            <tr>
+                <td class="label">Password</td>
+                <td><input type="password" name="password" value="{{password}}"></td>
+                <td class="error">{{password_error}}</td>
+            </tr>
+            <tr>
+                <td class="label">Verify Password</td>
+                <td><input type="password" name="verify" value="{{verify}}"></td>
+                <td class="error">{{verify_error}}</td>
+            </tr>
+            <tr>
+                <td class="label">(optional) E-mail</td>
+                <td><input type="text" name="email" value="{{email}}"></td>
+                <td class="error">{{email_error}}</td>
+            </tr>
+        </table>
         <br>
         <input type="submit">
     </form>
