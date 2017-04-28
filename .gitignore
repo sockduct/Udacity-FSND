@@ -6,6 +6,8 @@
 *.swp
 
 # Directories to ignore
-GCP-PDS-AES/
+GCP-PDS-AES
 gcp/
+/*/solutions/
+/*/solutions
 
