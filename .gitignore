@@ -1,0 +1,11 @@
+# Git files to ignore
+*.pyc
+*.log
+*.pkl
+*~
+*.swp
+
+# Directories to ignore
+GCP-PDS-AES/
+gcp/
+
