@@ -1,0 +1,38 @@
+/* Customize Bootstrap CSS File */
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  padding-top: 50px;
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+
+.navbar-brand-custom {
+    padding: 1px 1px;
+}
+
+.navbar-brand-custom > img {
+    display: inline;
+}
+
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.img-jumbotron {
+    max-width: 50%;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #f5f5f5;
+}
