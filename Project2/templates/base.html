@@ -18,6 +18,10 @@
     <link href="/static/css/customize-template.css" rel="stylesheet">
     <!-- My Customization - Needs some work, currently breaks bootstrap layout! -->
     <!--link href="/static/css/main.css" rel="stylesheet"-->
+
+    <!-- Page specific CSS -->
+    {% block page_css %}
+    {% endblock %}
   </head>
 
   <body>
@@ -32,7 +36,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand navbar-brand-custom" href="#">
+          <a class="navbar-brand navbar-brand-custom" href="/">
             <img class="header-image" src="/static/img/brandicon.png" alt="Brand Logo">
             The Accumulator
           </a>
@@ -48,20 +52,13 @@
           </ul>
           -->
 
-          <!-- Navigation Bar Right Side Links -->
           <ul class="nav navbar-nav navbar-right">
-            <li class="active"><a href="#newpost">Author a Post
-              <span class="sr-only">(current)</span></a>
-            </li>
-            {% if userauth %}
-              <li><a href="#signout">Sign out</a></li>
-            {% else %}
-              <li><a href="#signup">Sign up</a></li>
-              <li><a href="#signin">Sign in</a></li>
-            {% endif %}
+            <!-- Header, righthand section varies per page -->
+            {% block header_content %}
+            {% endblock %}
           </ul>
-        </div><!--/.nav-collapse -->
-      </div>
+        </div>
+      </div><!--/.nav-collapse -->
     </nav>
 
     <!-- Middle section varies per page - no template -->
@@ -79,10 +76,9 @@
 
         <!-- Navigation Bar Right Side Links -->
         <ul class="nav navbar-nav navbar-right text-muted">
-          <li class="active"><a href="#about">About
-            <span class="sr-only">(current)</span></a>
-          </li>
-          <li><a href="#contact">Contact</a></li>
+          <!-- Footer, righthand section varies per page -->
+          {% block footer_content %}
+          {% endblock %}
         </ul>
       </div>
     </footer>

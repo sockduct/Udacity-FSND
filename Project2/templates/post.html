@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+  <!-- Page specific CSS -->
+  {% block page_css %}
+    <link href="/static/css/font-awesome.min.css" rel="stylesheet">
+    <link href="/static/css/post.css" rel="stylesheet">
+  {% endblock %}
+
+  {% block header_content %}
+    <!-- Navigation Bar Right Side Links -->
+    {% if userauth %}
+      <li><a href="#">Signed in as {{user}}</a></li>
+      <li class="active"><a href="/newpost">Author a Post</a>
+      </li>
+      <li><a href="/signout">Sign out</a></li>
+    {% else %}
+      <li><a href="/signup">Sign up</a></li>
+      <li class="active"><a href="/signin">Sign in</a></li>
+    {% endif %}
+  {% endblock %}
+
+  {% block main_content %}
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 blog-post">
+          <h2 class="blog-post-title">{{title}}</h2>
+
+          <span class="blog-post-meta">{{last_modified.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{author}}</span>
+          <a href="/post/{{post_id}}?entry=edpost"><span class="glyph-pad-big fa fa-pencil fa-lg"></span></a>
+          <span class="glyph-pad-small"></span>
+          <a href="/post/{{post_id}}?entry=delpost"><span class="fa fa-trash fa-lg"></span></a>
+
+          <div class="alert alert-danger alert-dismissible {{hide_ed}}" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Error!</strong> Only the author can edit or delete the post.
+          </div>
+
+          <div class="alert alert-danger alert-dismissible {{hide_ld}}" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Error!</strong> You may not like/dislike your own posts.
+          </div>
+
+          <!-- Too advanced for now - add this functionality later when know JavaScript and how to
+               pass data back and forth between it (JS) and Python -->
+          <!-- Deemphasize a button by making it look like a link while maintaining button behavior -->
+          <!--button type="button" class="btn btn-link" data-toggle="modal" data-target="#delModal"><span class="fa fa-trash fa-lg"></span></button>
+
+          <div class="modal fade" id="delModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title">Are you sure?</h4>
+                </div>
+                <div class="modal-body">
+                  <p>Permanently delete this post?&hellip;</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary" name="entry" value="delete">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div-->
+
+          <pre>{{content}}</pre>
+          <span>Tags:  {{tags}}</span>
+          <span class="glyph-pad-big"> </span>
+          <a href="/post/{{post_id}}?entry=like">
+            <span class="badge">
+              {% if likes %}
+                +{{likes}}
+              {% else %}
+                0
+              {% endif %}
+            </span> <span class="fa
+              {% if liked %}
+                fa-thumbs-up
+              {% else %}
+                fa-thumbs-o-up
+              {% endif %}
+            fa-lg"></span>
+          </a>
+          <span class="glyph-pad-small"></span>
+          <a href="/post/{{post_id}}?entry=dislike">
+            <span class="fa
+              {% if disliked %}
+                fa-thumbs-down
+              {% else %}
+                fa-thumbs-o-down
+              {% endif %}
+            fa-lg"></span>
+             <span class="badge">
+              {% if dislikes %}
+                -{{dislikes}}
+              {% else %}
+                0
+              {% endif %}
+            </span>
+          </a>
+          <span class="glyph-pad-small"></span>
+          <a href="/post/{{post_id}}?entry=comment">
+            <span class="fa fa-comment-o fa-lg"></span>
+             <span class="badge">
+            {% if pcomments %}
+              {{pcomments}}
+            {% else %}
+              0
+            {% endif %}
+            </span>
+          </a>
+        </div><!-- /.blog-post -->
+      </div><!-- /.row -->
+
+      {% for comment in comments %}
+        <div class="row">
+          <div class="col-md-6">
+            <span class="content-date">{{comment.created.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{comment.author}}</span>
+
+            <a href="/post/{{post_id}}?comment_id={{comment.key().id()}}&entry=edcomment"><span class="glyph-pad-big fa fa-pencil fa-lg"></span></a>
+            <span class="glyph-pad-small"></span>
+            <a href="/post/{{post_id}}?comment_id={{comment.key().id()}}&entry=delcomment"><span class="fa fa-trash fa-lg"></span></a>
+
+            <div class="alert alert-danger alert-dismissible {{hide_ed}}" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <strong>Error!</strong> Only the author can edit or delete the comment.
+            </div>
+
+            <pre class="content-body">{{comment.content}}</pre>
+          </div>
+        </div>
+      {% endfor %}
+    </div><!-- /.container -->
+  {% endblock %}
