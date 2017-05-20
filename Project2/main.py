@@ -64,10 +64,10 @@ class User(db.Model):
     @classmethod
     def by_username(cls, username):
         user = cls.all().filter('username =', username).get()
-        if user:
-            logging.debug('Found user by username={}.'.format(username))
-        else:
-            logging.debug('No user found for username={}.'.format(username))
+        #if user:
+        #    logging.debug('Found user by username={}.'.format(username))
+        #else:
+        #    logging.debug('No user found for username={}.'.format(username))
         return user
 
     @classmethod
@@ -78,12 +78,12 @@ class User(db.Model):
         email = kwargs.get('email')
         user = cls(parent=User.pkey(), username=username, passwdhash=passwdhash, email=email)
         user.put()
-        logging.debug('Creating account username={}, password_hash={}, email={}, entity_key={}, '
-                      'uid={}'.format(username, passwdhash, email, user.key(), user.key().id()))
+        #logging.debug('Creating account username={}, password_hash={}, email={}, entity_key={}, '
+        #              'uid={}'.format(username, passwdhash, email, user.key(), user.key().id()))
         # Wait until user created in DB
         while True:
             if not cls.by_username(username):
-                logging.debug("Account hasn't been created yet - sleeping for 100ms...")
+                #logging.debug("Account hasn't been created yet - sleeping for 100ms...")
                 time.sleep(0.100)
             else:
                 break
@@ -135,17 +135,17 @@ def make_passwdhash(name, pw, salt=None):
     # Don't need to use HMAC for password hash because shouldn't be accessible
     h = hashlib.sha256(name + pw + salt).hexdigest()
     # Don't reveal actual password
-    logging.debug('make_passwdhash - for name={}, pw={}, salt={}, created hash={}'.format(name, '*',
-                  salt, h))
+    #logging.debug('make_passwdhash - for name={}, pw={}, salt={}, created hash={}'.format(name, '*',
+    #              salt, h))
     return '{}|{}'.format(h, salt)
 
 def validate_pw(name, pw, h):
     _, _, salt = h.partition('|')
     chkh = make_passwdhash(name, pw, salt)
     # Don't reveal actual password
-    logging.debug('validate_pw - for name={}, pw={}, salt={}'.format(name, '*', salt))
+    #logging.debug('validate_pw - for name={}, pw={}, salt={}'.format(name, '*', salt))
     result = chkh == h
-    logging.debug('passed_hash = {}, calculated_hash = {}, match={}'.format(h, chkh, result))
+    #logging.debug('passed_hash = {}, calculated_hash = {}, match={}'.format(h, chkh, result))
     return result
 
 # HASH(val + salt),salt
@@ -157,17 +157,17 @@ def make_sec_val(val, salt=None):
         h = hmac.new(SECRET_KEY, val+salt, hashlib.sha256).hexdigest()
         # Plain hash not secure, is user figures out algorithm can easily replicate
         # h = hashlib.sha256(val + salt).hexdigest()
-        logging.debug('Value passed:  value={}, Salt to use:  {}, Calculated HMAC:  {}'.format(val,
-                      salt, h))
+        #logging.debug('Value passed:  value={}, Salt to use:  {}, Calculated HMAC:  {}'.format(val,
+        #              salt, h))
         return '{}|{}|{}'.format(val, h, salt)
 
 def chk_sec_val(secval):
     if secval:
         val, h, salt = secval.split('|')
         chkh = make_sec_val(val, salt)
-        logging.debug('Secure value passed:  value={}, HMAC={}, salt={}'.format(val, h, salt))
+        #logging.debug('Secure value passed:  value={}, HMAC={}, salt={}'.format(val, h, salt))
         result = chkh == secval
-        logging.debug('Calculated secure value:  {}, matches={}'.format(chkh, result))
+        #logging.debug('Calculated secure value:  {}, matches={}'.format(chkh, result))
         if result:
             return val
 
@@ -232,24 +232,24 @@ def check_user_info(params):
 # Convert from stored pickled value to object
 def get_stval(st_val):
     obj_val = pickle.loads(st_val)
-    logging.debug('get_stval - retrieved object {}'.format(obj_val))
+    #logging.debug('get_stval - retrieved object {}'.format(obj_val))
     return obj_val
 
 # Convert from object to pickled value (for storage)
 def set_pval(obj_val):
-    logging.debug('set_pval - received object {}'.format(obj_val))
+    #logging.debug('set_pval - received object {}'.format(obj_val))
     st_val = pickle.dumps(obj_val)
     return st_val
 
 def post_votes(blog):
     if blog.likes:
         likes = get_stval(blog.likes)
-        logging.debug('PostPage - likes for {}:  {}'.format(blog.title, likes))
+        #logging.debug('PostPage - likes for {}:  {}'.format(blog.title, likes))
     else:
         likes = set()
     if blog.dislikes:
         dislikes = get_stval(blog.dislikes)
-        logging.debug('PostPage - dislikes for {}:  {}'.format(blog.title, dislikes))
+        #logging.debug('PostPage - dislikes for {}:  {}'.format(blog.title, dislikes))
     else:
         dislikes = set()
 
@@ -269,7 +269,7 @@ class BlogHandler(webapp2.RequestHandler):
     def render(self, template, **kwargs):
         self.write(self.render_str(template, **kwargs))
 
-    def set_sec_cookie(self, ckey, cval):
+    def set_sec_cookie(self, ckey, cval, auth_cookie=None):
         sec_cval = make_sec_val(cval)
         # Production:
         # cookie = ('{}={}; Domain=accumulator-jrs.appspot.com; Path=/; '.format(ckey, sec_cval)
@@ -281,28 +281,34 @@ class BlogHandler(webapp2.RequestHandler):
         # webapp2 docs recommend using response.set_cookie method:
         # self.response.set_cookie(ckey, sec_cval, path='/', domain='accumulator-jrs.appspot.com',
         #                          secure=True, httponly=True, overwrite=True)
-        self.response.set_cookie(ckey, sec_cval, path='/')
-        logging.debug("Set_Sec_Cookie/Set-Cookie - create cookie:  {}={}; Path=/; ".format(ckey,
-                      sec_cval))
+        if auth_cookie == 'remember':
+            # Set persistent cookie to last for 30 days
+            expiry = datetime.datetime.now() + datetime.timedelta(days=30)
+            self.response.set_cookie(ckey, sec_cval, path='/', expires=expiry)
+        else:
+            # Set session cookie
+            self.response.set_cookie(ckey, sec_cval, path='/')
+        #logging.debug("Set_Sec_Cookie/Set-Cookie - create cookie:  {}={}; Path=/; ".format(ckey,
+        #              sec_cval))
 
     def read_sec_cookie(self, ckey):
         cval = self.request.cookies.get(ckey)
-        logging.debug('Request to agent for cookie (key={}) yielded value={}'.format(
-                      ckey, cval))
+        #logging.debug('Request to agent for cookie (key={}) yielded value={}'.format(
+        #              ckey, cval))
         # Debugging code
-        if not cval:
-            logging.debug("Agent doesn't have userid cookie")
-        elif chk_sec_val(cval):
-            logging.debug('Successfully read and validated userid cookie')
-        else:
-            logging.debug('Validation of userid cookie failed')
+        #if not cval:
+        #    logging.debug("Agent doesn't have userid cookie")
+        #elif chk_sec_val(cval):
+        #    logging.debug('Successfully read and validated userid cookie')
+        #else:
+        #    logging.debug('Validation of userid cookie failed')
         t1 = cval and chk_sec_val(cval)
         t2 = chk_sec_val(cval)
-        logging.debug('{} and {} = {}'.format(cval, t2, t1))
+        #logging.debug('{} and {} = {}'.format(cval, t2, t1))
         return cval and chk_sec_val(cval)
 
-    def login(self, user):
-        self.set_sec_cookie('userid', str(user.key().id()))
+    def login(self, user, auth_cookie=None):
+        self.set_sec_cookie('userid', str(user.key().id()), auth_cookie)
 
     def logout(self):
         # This is problematic as it doesn't escape special values:
@@ -317,12 +323,12 @@ class BlogHandler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *args, **kwargs)
         uid = self.read_sec_cookie('userid')
         # Debugging code
-        logging.debug('Read userid of {} from cookie'.format(uid))
+        #logging.debug('Read userid of {} from cookie'.format(uid))
         if uid:
             t1 = User.by_id(int(uid))
-            logging.debug('User.by_id({}) = {}'.format(uid, t1))
+            #logging.debug('User.by_id({}) = {}'.format(uid, t1))
             t2 = uid and t1
-            logging.debug('uid and User.by_id({}) = {}'.format(uid, t2))
+            #logging.debug('uid and User.by_id({}) = {}'.format(uid, t2))
         self.user = uid and User.by_id(int(uid))
 
 class SignupPage(BlogHandler):
@@ -334,10 +340,11 @@ class SignupPage(BlogHandler):
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
+        auth_cookie = self.request.get('auth_cookie')
 
         params = dict(username=username, password=password, verify=verify, email=email,
-                      username_error='', password_error='', verify_error='', email_error='',
-                      user_unique_chk=True, have_error=False)
+                      auth_cookie=auth_cookie, username_error='', password_error='',
+                      verify_error='', email_error='', user_unique_chk=True, have_error=False)
 
         check_user_info(params)
 
@@ -355,7 +362,7 @@ class SignupPage(BlogHandler):
 
     def register(self, **params):
         user = User.create(**params)
-        self.login(user)
+        self.login(user, params['auth_cookie'])
         self.redirect('/welcome')
 
 class SignoutPage(BlogHandler):
@@ -379,9 +386,10 @@ class SigninPage(BlogHandler):
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
+        auth_cookie = self.request.get('auth_cookie')
 
-        params = dict(username=username, password=password, username_error='', password_error='',
-                      auth_error='', have_error=False)
+        params = dict(username=username, password=password, auth_cookie=auth_cookie,
+                      username_error='', password_error='', auth_error='', have_error=False)
 
         check_user_info(params)
 
@@ -394,7 +402,7 @@ class SigninPage(BlogHandler):
             logging.debug('SigninPage - attempting login...')
             user = User.login(username, password)
             if user:
-                self.login(user)
+                self.login(user, auth_cookie)
                 self.render('welcome.html', username=username)
             else:
                 # Invalid username and/or password
@@ -425,6 +433,7 @@ class MainPage(BlogHandler):
 # Create or Update Post
 class CUPostPage(BlogHandler):
     def get(self):
+        logging.debug('CUPostPage/get/entered...')
         if self.user:
             post_id = self.request.get('post_id')
             entry = self.request.get('entry')
@@ -443,6 +452,8 @@ class CUPostPage(BlogHandler):
                 if not blog:
                     self.error(404)
                     return
+            else:
+                blog = None
             ### valid_comment might need some work on parent path...
             if comment_id:
                 # Look up comment_id:
@@ -461,7 +472,7 @@ class CUPostPage(BlogHandler):
             #
             # Case 4 - Edit Comment for existing post
             if blog and comment:
-                jinja_env.globals['cu_type'] = 'Edit Existing Commnt'
+                jinja_env.globals['cu_type'] = 'Edit Existing Comment'
                 jinja_env.globals['new'] = False
                 jinja_env.globals['ro_title'] = True
                 params = dict(title=blog.title, content=comment.content, tags=blog.tags)
@@ -475,20 +486,26 @@ class CUPostPage(BlogHandler):
             elif blog:
                 jinja_env.globals['cu_type'] = 'Edit Existing Post'
                 jinja_env.globals['new'] = False
+                jinja_env.globals['ro_title'] = False
                 params = dict(title=blog.title, content=blog.content, tags=blog.tags)
             # Case 1 - New Post
             else:
-                params = dict(title='', content='', tags='')
                 jinja_env.globals['cu_type'] = 'Author a New Post'
                 jinja_env.globals['new'] = True
+                jinja_env.globals['ro_title'] = False
+                params = dict(title='', content='', tags='')
 
             self.render("cupost.html", **params)
         else:
             self.redirect("/signin?redirect=cupost")
 
     def post(self):
+        logging.debug('CUPostPage/post/entered...')
         if not self.user:
             self.redirect('/signin?redirect=cupost')
+            # Note - method execution continues without return after the redirect call, don't
+            # forget!
+            return
 
         jinja_env.globals['user'] = self.user.username
 
@@ -497,11 +514,19 @@ class CUPostPage(BlogHandler):
         comment_id = self.request.get('comment_id')
         cancel = self.request.get('cancel')
         if cancel:
+            logging.debug('CUPostPage/post/Found cancel parameter of {}.'.format(cancel))
             if post_id:
+                logging.debug('CUPostPage/post/Redirecting to /post/{}...'.format(post_id))
                 self.redirect('/post/{}'.format(post_id))
+                return
             else:
+                logging.debug('CUPostPage/post/Redirecting to /...')
                 self.redirect('/')
+                return
+        else:
+            logging.debug('CUPostPage/post/No cancel parameter found.')
 
+        logging.debug('CUPostPage/post/Made it passed cancel check.')
         params = dict(title=self.request.get('title'), content=self.request.get('content'),
                       tags=self.request.get('tags'), title_error='', content_error='',
                       tags_error='')
@@ -534,6 +559,7 @@ class CUPostPage(BlogHandler):
                     comment.last_modified = datetime.datetime.now()
                     comment.put()
                     self.redirect('/post/{}'.format(post_id))
+                    return
             # New Comment
             if entry == 'comment':
                 # There's actually a comment
@@ -542,6 +568,7 @@ class CUPostPage(BlogHandler):
                                 author=self.user.username)
                     c.put()
                     self.redirect('/post/{}'.format(str(blog.key().id())))
+                    return
                 # No comment content
                 else:
                     content_error = 'Please include some content in your comment.'
@@ -554,12 +581,14 @@ class CUPostPage(BlogHandler):
                 blog.last_modified = datetime.datetime.now()
                 blog.put()
                 self.redirect('/post/{}'.format(post_id))
+                return
         # New Blog Post
         elif params['title'] and params['content']:
             p = Blog(parent=Blog.pkey(), title=params['title'], author=self.user.username,
                      content=params['content'], tags=params['tags'])
             p.put()
             self.redirect('/post/{}'.format(str(p.key().id())))
+            return
         # Blog Post missing parameters
         else:
             if not params['title']:
@@ -570,6 +599,7 @@ class CUPostPage(BlogHandler):
 
 class PostPage(BlogHandler):
     def get(self, post_id):
+        logging.debug('PostPage/get/entered...')
         key = db.Key.from_path('Blog', int(post_id), parent=Blog.pkey())
         blog = db.get(key)
 
@@ -584,6 +614,7 @@ class PostPage(BlogHandler):
             jinja_env.globals['post_id'] = post_id
             jinja_env.globals['hide_ed'] = 'collapse'
             jinja_env.globals['hide_ld'] = 'collapse'
+            jinja_env.globals['hide_ced'] = 'collapse'
         else:
             self.error(404)
             return
@@ -605,7 +636,7 @@ class PostPage(BlogHandler):
         comment_id = self.request.get('comment_id')
         if comment_id:
             ckey = db.Key.from_path('Comment', int(comment_id), parent=blog.key())
-            comment = db.get(key)
+            comment = db.get(ckey)
         else:
             comment = None
         entry = self.request.get('entry')
@@ -632,18 +663,22 @@ class PostPage(BlogHandler):
             if self.user.username == comment.author:
                 if entry == 'edcomment':
                     self.redirect('/cupost?post_id={}&comment_id={}'.format(post_id, comment_id))
+                    return
                 elif entry == 'delcomment':
                     # Ideally prompt first with are you sure...
                     # Put a modal to do this in post.html but not sure how to integrate...
                     logging.debug('User {} deleted their comment created {} for post {}'
                                   '.'.format(self.user.username, comment.created, blog.title))
+                    logging.debug('Note:  Blog id={}, Method Comment id={}, Passed Comment id={}'
+                                  ''.format(blog.key().id(), comment.key().id(), comment_id))
                     db.delete(comment)
                     self.redirect('/post/{}'.format(post_id))
+                    return
                 else:
                     logging.debug('Invalid entry action - {} - ignoring.'.format(entry))
             # Not comment author - display error message:
             else:
-                del jinja_env.globals['hide_ed']
+                del jinja_env.globals['hide_ced']
 
         # Now deal with posts:
         # Authenticated user, valid blog if made it this far, and action (entry) request:
@@ -651,11 +686,13 @@ class PostPage(BlogHandler):
             # Anyone can comment on a post
             if entry == 'comment':
                 self.redirect('/cupost?post_id={}&entry=comment'.format(post_id))
+                return
 
             # Is user post author?
             if self.user.username == blog.author:
                 if entry == 'edpost':
                     self.redirect('/cupost?post_id={}'.format(post_id))
+                    return
                 elif entry == 'delpost':
                     # Ideally prompt first with are you sure...
                     # Put a modal to do this in post.html but not sure how to integrate...
@@ -663,6 +700,7 @@ class PostPage(BlogHandler):
                                   '.'.format(self.user.username, blog.title, blog.last_modified))
                     db.delete(blog)
                     self.redirect('/')
+                    return
                 elif entry == 'like' or entry == 'dislike':
                     logging.debug('User {} tried to {} own post - permission '
                                   'denied.'.format(self.user.username, entry))
@@ -709,7 +747,7 @@ class PostPage(BlogHandler):
                 likes, dislikes = post_votes(blog)
                 logging.debug('PostPage - {} {}d post, after DB put, likes now = {}, dislikes '
                               'now = {}'.format(self.user.username, entry, likes, dislikes))
-            elif entry == 'edit' or entry == 'delete':
+            elif entry == 'edpost' or entry == 'delpost':
                 logging.debug('User {} tried to edit/delete post by {} - permission '
                               'denied.'.format(self.user.username, blog.author))
                 del jinja_env.globals['hide_ed']
@@ -718,6 +756,7 @@ class PostPage(BlogHandler):
         # Tried to request an action (entry=...) but not authenticated - redirect to login
         elif entry:
             self.redirect('/signin?redirect=post/{}'.format(post_id))
+            return
 
         self.render('post.html', title=blog.title, author=blog.author, content=blog.content,
                     tags=blog.tags, last_modified=blog.last_modified, comments=comments)

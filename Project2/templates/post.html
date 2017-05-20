@@ -9,8 +9,8 @@
   {% block header_content %}
     <!-- Navigation Bar Right Side Links -->
     {% if userauth %}
-      <li><a href="#">Signed in as {{user}}</a></li>
-      <li class="active"><a href="/newpost">Author a Post</a>
+      <li class="active"><a href="#">Signed in as {{user}}</a></li>
+      <li><a href="/newpost">Author a Post</a>
       </li>
       <li><a href="/signout">Sign out</a></li>
     {% else %}
@@ -115,13 +115,13 @@
       {% for comment in comments %}
         <div class="row">
           <div class="col-md-6">
-            <span class="content-date">{{comment.created.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{comment.author}}</span>
+            <span class="content-date">{{comment.last_modified.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{comment.author}}</span>
 
             <a href="/post/{{post_id}}?comment_id={{comment.key().id()}}&entry=edcomment"><span class="glyph-pad-big fa fa-pencil fa-lg"></span></a>
             <span class="glyph-pad-small"></span>
             <a href="/post/{{post_id}}?comment_id={{comment.key().id()}}&entry=delcomment"><span class="fa fa-trash fa-lg"></span></a>
 
-            <div class="alert alert-danger alert-dismissible {{hide_ed}}" role="alert">
+            <div class="alert alert-danger alert-dismissible {{hide_ced}}" role="alert">
               <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
               <strong>Error!</strong> Only the author can edit or delete the comment.
             </div>
