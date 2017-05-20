@@ -1,9 +1,20 @@
 Google App Engine w/ Python App
 
 Description:
-App to...
+Multi User Blog Project (Project 2)
 
-Methods:
-* / - Main Page, Hello Greeting
-* ...
+GAE Datastore Entities:
+* User - Represents a user account
+* Blog - Represents a user post
+* Comment - Represents a user comment on a post, linked to respective post
+
+Main Methods:
+* / - MainPage, Landing/default page - displays all posts 
+* /cupost|newpost|editpost - CUPostPage, Create or Update posts
+* /post/[0-9]+ - PostPage, View an individual post by id, links to edit, delete, like/dislike or
+                 comment on post
+* /signin - SigninPage, Login page for users with an account
+* /signout - SignoutPage, Logout page for authenticated users
+* /signup - SignupPage, Register for an account
+* /welcome - WelcomePage, Greet authenticated users
 
