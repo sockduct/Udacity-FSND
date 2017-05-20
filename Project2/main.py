@@ -423,6 +423,7 @@ class MainPage(BlogHandler):
         # Limit to 9 or 10 and have previous/next buttons?
         blogs = Blog.all().order('-created')
         jinja_env.globals['now'] = datetime.datetime.now().strftime(DATE_FMT)
+        jinja_env.globals['bcount'] = blogs.count()
         if self.user:
             jinja_env.globals['userauth'] = True
             jinja_env.globals['user'] = self.user.username
