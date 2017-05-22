@@ -1,259 +1,29 @@
-import ConfigParser
 import datetime
+from entities import User, Blog, Comment
 from google.appengine.ext import db
-import hashlib
-import hmac
 import jinja2
 import logging
 import os
 import pickle
-import random
-import re
-import string
 import time
+from utils import *
 import webapp2
 
 ####################################################################################################
+# To Do
+#===================================================================================================
+# * Add delay after deleting post (maybe after deleting comment too) so it doesn't temporarily show
+#   up when user is directed back to landing page
+#
+####################################################################################################
 # Constants
 DATE_FMT = "%a %b %d, %Y at %H:%M:%S %z"
-# Includes string.punctuation - more secure but requires escaping...
-SALT_SET = string.letters + string.digits + string.punctuation
-# Valid username and password formats
-VLD_USERNAME = re.compile(r'^[a-zA-Z0-9_-]{3,20}$')
-VLD_PASSWORD = re.compile(r'^.{10,40}$')
-# Instructor states that in his experience (as lead engineer at Reddit) this
-# is good enough.  If the email isn't valid, the email program/tool will
-# catch it.  Definitely some wisdom to his KISS thoughts.
-VLD_EMAIL = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 
 # Jinja template directory will be directory of this file + /templates
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 # Jinja setup and look for templates in template_dir
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                extensions=['jinja2.ext.loopcontrols'], autoescape=True)
-
-# Load HMAC Key - Note that GAE doesn't appear to allow reading from outside the app directory
-config = ConfigParser.ConfigParser()
-config.read('environment.cfg')
-SECRET_KEY = config.get('seed', 'key')
-
-# Datastore Entities (like Database record/row template)
-# User Entity
-class User(db.Model):
-    username = db.StringProperty(required=True)
-    passwdhash = db.StringProperty(required=True)
-    email = db.StringProperty()
-    # auto_now_add = Default to current date/time
-    created = db.DateTimeProperty(auto_now_add=True)
-
-    @staticmethod
-    def pkey(group='default'):
-        return db.Key.from_path('Users', group)
-
-    # get_by_id is db.Model method
-    @classmethod
-    def by_id(cls, uid):
-        user = cls.get_by_id(uid, parent=User.pkey())
-        if user:
-            logging.debug('Found user ({}) by uid={}.'.format(user.username, uid))
-        else:
-            logging.debug('No user found for uid={}.'.format(uid))
-        return user
-
-    # Get all User entities (DB objects) and retrieve one matching name
-    @classmethod
-    def by_username(cls, username):
-        user = cls.all().filter('username =', username).get()
-        #if user:
-        #    logging.debug('Found user by username={}.'.format(username))
-        #else:
-        #    logging.debug('No user found for username={}.'.format(username))
-        return user
-
-    @classmethod
-    def create(cls, *args, **kwargs):
-        username = kwargs['username']
-        password = kwargs['password']
-        passwdhash = make_passwdhash(username, password)
-        email = kwargs.get('email')
-        user = cls(parent=User.pkey(), username=username, passwdhash=passwdhash, email=email)
-        user.put()
-        #logging.debug('Creating account username={}, password_hash={}, email={}, entity_key={}, '
-        #              'uid={}'.format(username, passwdhash, email, user.key(), user.key().id()))
-        # Wait until user created in DB
-        while True:
-            if not cls.by_username(username):
-                #logging.debug("Account hasn't been created yet - sleeping for 100ms...")
-                time.sleep(0.100)
-            else:
-                break
-        return user
-
-    @classmethod
-    def login(cls, username, password):
-        user = cls.by_username(username)
-        if user and validate_pw(username, password, user.passwdhash):
-            return user
-
-# Blog Entity
-class Blog(db.Model):
-    title = db.StringProperty(required=True)
-    author = db.StringProperty(required=True)
-    content = db.TextProperty(required=True)
-    tags = db.StringProperty()
-    # Note - limited to 1 MB
-    picture = db.BlobProperty()
-    likes = db.BlobProperty()
-    dislikes = db.BlobProperty()
-    # auto_now_add = Default to current date/time
-    created = db.DateTimeProperty(auto_now_add=True)
-    last_modified = db.DateTimeProperty(auto_now_add=True)
-
-    def render(self):
-        self._render_text = self.content.replace('\n', '<br>')
-        return render_str("post.html", p = self)
-
-    @staticmethod
-    def pkey(name='default'):
-        return db.Key.from_path('Blogs', name)
-
-# Note - Comments should be linked to their respective Blog post using its key as their parent
-class Comment(db.Model):
-    author = db.StringProperty(required=True)
-    content = db.TextProperty(required=True)
-    # auto_now_add = Default to current date/time
-    created = db.DateTimeProperty(auto_now_add=True)
-    last_modified = db.DateTimeProperty(auto_now_add=True)
-
-def make_salt():
-    return ''.join(random.choice(SALT_SET) for i in range(5))
-
-# HASH(name + pw + salt),salt
-def make_passwdhash(name, pw, salt=None):
-    if not salt:
-        salt = make_salt()
-    # Don't need to use HMAC for password hash because shouldn't be accessible
-    h = hashlib.sha256(name + pw + salt).hexdigest()
-    # Don't reveal actual password
-    #logging.debug('make_passwdhash - for name={}, pw={}, salt={}, created hash={}'.format(name, '*',
-    #              salt, h))
-    return '{}|{}'.format(h, salt)
-
-def validate_pw(name, pw, h):
-    _, _, salt = h.partition('|')
-    chkh = make_passwdhash(name, pw, salt)
-    # Don't reveal actual password
-    #logging.debug('validate_pw - for name={}, pw={}, salt={}'.format(name, '*', salt))
-    result = chkh == h
-    #logging.debug('passed_hash = {}, calculated_hash = {}, match={}'.format(h, chkh, result))
-    return result
-
-# HASH(val + salt),salt
-def make_sec_val(val, salt=None):
-    if val:
-        if not salt:
-            salt = make_salt()
-        # Use HMAC - Secure if SECRET_KEY secured
-        h = hmac.new(SECRET_KEY, val+salt, hashlib.sha256).hexdigest()
-        # Plain hash not secure, is user figures out algorithm can easily replicate
-        # h = hashlib.sha256(val + salt).hexdigest()
-        #logging.debug('Value passed:  value={}, Salt to use:  {}, Calculated HMAC:  {}'.format(val,
-        #              salt, h))
-        return '{}|{}|{}'.format(val, h, salt)
-
-def chk_sec_val(secval):
-    if secval:
-        val, h, salt = secval.split('|')
-        chkh = make_sec_val(val, salt)
-        #logging.debug('Secure value passed:  value={}, HMAC={}, salt={}'.format(val, h, salt))
-        result = chkh == secval
-        #logging.debug('Calculated secure value:  {}, matches={}'.format(chkh, result))
-        if result:
-            return val
-
-def valid_username(username):
-    return VLD_USERNAME.match(username)
-
-def valid_password(password):
-    return VLD_PASSWORD.match(password)
-
-def valid_verify(password, verify):
-    return password == verify
-
-def valid_email(email):
-    # Email optional - only validate if submitted
-    if email is None:
-        logging.debug('no email address included (None)')
-        return True
-    elif email == '':
-        logging.debug("no email address included ('')")
-        return True
-    else:
-        return VLD_EMAIL.match(email)
-
-def valid_post(post_id):
-    key = db.Key.from_path('Blog', int(post_id), parent=Blog.pkey())
-    return db.get(key)
-
-def valid_comment(post_id, comment_id):
-    blog = valid_post(post_id)
-    if blog:
-        key = db.Key.from_path('Comment', int(comment_id), parent=blog.key())
-        return db.get(key)
-
-def check_user_info(params):
-    if not valid_username(params['username']):
-        params['username_error'] = ('Invalid username - Must be from 3-20 characters'
-                                    ' consisting of a-z, A-Z, 0-9, _, -')
-        params['have_error'] = True
-
-    ### user = User.by_username(params['username'])
-
-    # If this user already exists and there isn't another error
-    if (params.get('user_unique_chk') and User.by_username(params['username']) and not
-            params['have_error']):
-        params['username_error'] = ('Username unavailable - already in use, please '
-                                    'choose another username')
-        params['have_error'] = True
-
-    if not valid_password(params['password']):
-        params['password_error'] = 'Invalid password - Must be from 10-40 characters long'
-        params['have_error'] = True
-
-    if params.get('verify') and not valid_verify(params['password'], params['verify']):
-        params['verify_error'] = "Passwords don't match"
-        params['have_error'] = True
-
-    if params.get('email') and not valid_email(params['email']):
-        params['email_error'] = ('Invalid E-mail address - Must be name@domain.domain'
-                                 ' (e.g., george@yahoo.com)')
-        params['have_error'] = True
-
-# Convert from stored pickled value to object
-def get_stval(st_val):
-    obj_val = pickle.loads(st_val)
-    #logging.debug('get_stval - retrieved object {}'.format(obj_val))
-    return obj_val
-
-# Convert from object to pickled value (for storage)
-def set_pval(obj_val):
-    #logging.debug('set_pval - received object {}'.format(obj_val))
-    st_val = pickle.dumps(obj_val)
-    return st_val
-
-def post_votes(blog):
-    if blog.likes:
-        likes = get_stval(blog.likes)
-        #logging.debug('PostPage - likes for {}:  {}'.format(blog.title, likes))
-    else:
-        likes = set()
-    if blog.dislikes:
-        dislikes = get_stval(blog.dislikes)
-        #logging.debug('PostPage - dislikes for {}:  {}'.format(blog.title, dislikes))
-    else:
-        dislikes = set()
-
-    return likes, dislikes
 
 class BlogHandler(webapp2.RequestHandler):
     # Shortcut so can just say self.write vs. self.response.out.write:
