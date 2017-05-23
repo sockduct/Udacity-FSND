@@ -2,6 +2,10 @@ from google.appengine.ext import db
 
 # Blog Entity - for GAE Datastore
 class Blog(db.Model):
+    # Reference property to User (User 1-->M Blog(s))
+    user = db.ReferenceProperty(User, collection_name='blogs')
+
+    # General properties
     title = db.StringProperty(required=True)
     author = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
