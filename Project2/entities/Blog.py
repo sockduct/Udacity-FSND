@@ -1,9 +1,12 @@
 from google.appengine.ext import db
+# Causes circular dependency:
+# from User import User
+import User
 
 # Blog Entity - for GAE Datastore
 class Blog(db.Model):
     # Reference property to User (User 1-->M Blog(s))
-    user = db.ReferenceProperty(User, collection_name='blogs')
+    user = db.ReferenceProperty(User.User, collection_name='blogs')
 
     # General properties
     title = db.StringProperty(required=True)

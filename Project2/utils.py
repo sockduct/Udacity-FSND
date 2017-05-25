@@ -1,16 +1,21 @@
 import ConfigParser
-from entities import User, Blog, Comment
+# Belive fails because of circular dependency
+# from entities import User, Blog, Comment
+import entities
 from google.appengine.ext import db
 import hashlib
 import hmac
+import pickle
 import string
 import random
 import re
 
 ####################################################################################################
 # Constants
-# Includes string.punctuation - more secure but requires escaping...
-SALT_SET = string.letters + string.digits + string.punctuation
+# Had too many problems with string.punctuation - creates corner cases
+# Instead hand pick symbols which are OK
+my_punctuation = '!#()*+,-.:;<>[]^_{}'
+SALT_SET = string.letters + string.digits + my_punctuation
 # Valid username and password formats
 VLD_USERNAME = re.compile(r'^[a-zA-Z0-9_-]{3,20}$')
 VLD_PASSWORD = re.compile(r'^.{10,40}$')
@@ -91,7 +96,7 @@ def valid_email(email):
         return VLD_EMAIL.match(email)
 
 def valid_post(post_id):
-    key = db.Key.from_path('Blog', int(post_id), parent=Blog.pkey())
+    key = db.Key.from_path('Blog', int(post_id), parent=entities.Blog.pkey())
     return db.get(key)
 
 def valid_comment(post_id, comment_id):
@@ -109,7 +114,7 @@ def check_user_info(params):
     ### user = User.by_username(params['username'])
 
     # If this user already exists and there isn't another error
-    if (params.get('user_unique_chk') and User.by_username(params['username']) and not
+    if (params.get('user_unique_chk') and entities.User.by_username(params['username']) and not
             params['have_error']):
         params['username_error'] = ('Username unavailable - already in use, please '
                                     'choose another username')

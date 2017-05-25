@@ -26,9 +26,9 @@
           <h2 class="blog-post-title">{{title}}</h2>
 
           <span class="blog-post-meta">{{last_modified.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{author}}</span>
-          <a href="/post/{{post_id}}?entry=edpost"><span class="glyph-pad-big fa fa-pencil fa-lg"></span></a>
+          <a href="/editpost/{{post_id}}"><span class="glyph-pad-big fa fa-pencil fa-lg"></span></a>
           <span class="glyph-pad-small"></span>
-          <a href="/post/{{post_id}}?entry=delpost"><span class="fa fa-trash fa-lg"></span></a>
+          <a href="/delpost/{{post_id}}"><span class="fa fa-trash fa-lg"></span></a>
 
           <div class="alert alert-danger alert-dismissible {{hide_ed}}" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -66,7 +66,7 @@
           <pre>{{content}}</pre>
           <span>Tags:  {{tags}}</span>
           <span class="glyph-pad-big"> </span>
-          <a href="/post/{{post_id}}?entry=like">
+          <a href="/likepost/{{post_id}}">
             <span class="badge">
               {% if likes %}
                 +{{likes}}
@@ -82,7 +82,7 @@
             fa-lg"></span>
           </a>
           <span class="glyph-pad-small"></span>
-          <a href="/post/{{post_id}}?entry=dislike">
+          <a href="/dislikepost/{{post_id}}">
             <span class="fa
               {% if disliked %}
                 fa-thumbs-down
@@ -99,7 +99,7 @@
             </span>
           </a>
           <span class="glyph-pad-small"></span>
-          <a href="/post/{{post_id}}?entry=comment">
+          <a href="/newcomment/{{post_id}}">
             <span class="fa fa-comment-o fa-lg"></span>
              <span class="badge">
             {% if pcomments %}
@@ -117,14 +117,16 @@
           <div class="col-md-6">
             <span class="content-date">{{comment.last_modified.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{comment.author}}</span>
 
-            <a href="/post/{{post_id}}?comment_id={{comment.key().id()}}&entry=edcomment"><span class="glyph-pad-big fa fa-pencil fa-lg"></span></a>
+            <a href="/editcomment/{{post_id}}&{{comment.key().id()}}"><span class="glyph-pad-big fa fa-pencil fa-lg"></span></a>
             <span class="glyph-pad-small"></span>
-            <a href="/post/{{post_id}}?comment_id={{comment.key().id()}}&entry=delcomment"><span class="fa fa-trash fa-lg"></span></a>
+            <a href="/delcomment/{{post_id}}&{{comment.key().id()}}"><span class="fa fa-trash fa-lg"></span></a>
 
-            <div class="alert alert-danger alert-dismissible {{hide_ced}}" role="alert">
+          {% if ced and cid|int == comment.key().id()|int %}
+            <div class="alert alert-danger alert-dismissible" role="alert">
               <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
               <strong>Error!</strong> Only the author can edit or delete the comment.
             </div>
+          {% endif %}
 
             <pre class="content-body">{{comment.content}}</pre>
           </div>

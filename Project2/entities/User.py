@@ -1,6 +1,8 @@
 from google.appengine.ext import db
 import logging
-from utils import *
+import time
+# from utils import *
+import utils
 
 # User Entity - for GAE Datastore
 class User(db.Model):
@@ -38,7 +40,7 @@ class User(db.Model):
     def create(cls, *args, **kwargs):
         username = kwargs['username']
         password = kwargs['password']
-        passwdhash = make_passwdhash(username, password)
+        passwdhash = utils.make_passwdhash(username, password)
         email = kwargs.get('email')
         user = cls(parent=User.pkey(), username=username, passwdhash=passwdhash, email=email)
         user.put()
@@ -56,6 +58,6 @@ class User(db.Model):
     @classmethod
     def login(cls, username, password):
         user = cls.by_username(username)
-        if user and validate_pw(username, password, user.passwdhash):
+        if user and utils.validate_pw(username, password, user.passwdhash):
             return user
 

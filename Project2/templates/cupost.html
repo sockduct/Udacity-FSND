@@ -32,7 +32,10 @@
             </div>
             <div class="panel-body">
               <label for="inputContent" class="sr-only">Content</label>
-              {% if ro_title %}
+              {% if ro_content %}
+                <!-- Got rid of "required" before autofocus so can use Cancel button -->
+                <textarea name="content" placeholder="When I read this post it made me think..." disabled>{{content}}</textarea>
+              {% elif ro_title %}
                 <!-- Got rid of "required" before autofocus so can use Cancel button -->
                 <textarea name="content" placeholder="When I read this post it made me think..." autofocus>{{content}}</textarea>
               {% else %}
@@ -55,7 +58,10 @@
           </div>
 
           <br>
-          {% if new %}
+          {% if ro_content %}
+            <button class="btn btn-lg btn-info" type="submit" name="submit" value="submit">Delete</button>
+            <button class="btn btn-lg btn-default" type="submit" name="cancel" value="cancel">Cancel</button>
+          {% elif new %}
             <button class="btn btn-lg btn-primary" type="submit" name="submit" value="submit">Submit</button>
             <button class="btn btn-lg btn-default" type="submit" name="cancel" value="cancel">Cancel</button>
           {% else %}

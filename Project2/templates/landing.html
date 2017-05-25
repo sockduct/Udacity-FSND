@@ -23,7 +23,7 @@
         </div>
         <div class="col-md-6">
           {% if bcount >= 1 %}
-            <h1><a href="/post/{{blogs[0].key().id()}}">{{blogs[0].title}}</a></h1>
+            <h1><a href="/viewpost/{{blogs[0].key().id()}}">{{blogs[0].title}}</a></h1>
             <span class="blog-post-meta">{{blogs[0].created.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{blogs[0].author}}</span>
             <pre>{{blogs[0].content}}</pre>
             <span>Tags:  {{blogs[0].tags}}</span>
@@ -42,7 +42,7 @@
             {% continue %}
           {% else %}
             <div class="col-md-6">
-              <h2><a class="content-title" href="/post/{{blog.key().id()}}">{{blog.title}}</a></h2>
+              <h2><a class="content-title" href="/viewpost/{{blog.key().id()}}">{{blog.title}}</a></h2>
               <div class="content-date">{{blog.created.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{blog.author}}</div>
               <pre class="content-body">{{blog.content}}</pre>
               <span>Tags:  {{blog.tags}}</span>

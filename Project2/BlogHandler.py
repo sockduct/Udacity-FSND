@@ -1,7 +1,11 @@
+# Note - tried to put this in its own file, but then not sure how to pass jinja2 environment
+# variables
+
 import datetime
 from entities import User
 import jinja2
 import logging
+import os
 from utils import *
 import webapp2
 
