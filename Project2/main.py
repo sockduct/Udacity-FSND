@@ -15,12 +15,27 @@ import webapp2
 ####################################################################################################
 # To Do
 #===================================================================================================
-# * Add delay after deleting post (maybe after deleting comment too) so it doesn't temporarily show
-#   up when user is directed back to landing page
-#
+# * Try out Blog.render() functionality - returns template page (post.html) and p - reference to
+#   blog; Use (invoke) from template
+# * Move the BlogHandler class to its own file - to encapsulate the jinja info, put the jinja
+#   variables in a function and have the function return the variables so can share between files;
+#   If function changes directories make sure to adjust the template path (put in utils.py?)
+# * Believe by doing from <file> import <class> from __init__.py, allows doing import
+#   <directory>.<class> instead of import <directory>.<file>.<class>; To clean up code to use
+#   files instead of one monolith start with simple classes/function and use git branches
+# * Better not to handle cancel requests on the backend (unnecessary communication between
+#   front-end and backend).  Instead have the Cancel button redirect (form action or hyperlink)
+#   itself.
+# * In the DelPostPage class (and probably others) there's a lot of code duplication between the
+#   get and post methods - create a separate method with the common functionality, see:
+#   https://sourcemaking.com/refactoring/extract-method
 ####################################################################################################
 # Constants
 DATE_FMT = '%a %b %d, %Y at %H:%M:%S %z'
+
+
+def jinja_setup():
+    return  jinja_env
 
 # Jinja template directory will be directory of this file + /templates
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
