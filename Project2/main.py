@@ -233,8 +233,14 @@ class NewPostPage(BlogHandler):
             jinja_env.globals['cu_type'] = 'Author a New Post'
             jinja_env.globals['new'] = True
             jinja_env.globals['ro_title'] = False
+            # In case this is present (e.g., after visiting DeletePostPage) remove
+            if jinja_env.globals.get('ro_content'):
+                del jinja_env.globals['ro_content']
+
             params = dict(title='', content='', tags='')
 
+            logging.debug('NewPostPage/get: params={}, jinja_env.globals={}'.format(params,
+                          jinja_env.globals))
             self.render('cupost.html', **params)
         else:
             self.redirect('/signin?redirect=newpost')
@@ -260,6 +266,9 @@ class NewPostPage(BlogHandler):
                       tags=self.request.get('tags'), title_error='', content_error='',
                       tags_error='')
 
+        logging.debug('NewPostPage/post: params={}, jinja_env.globals={}'.format(params,
+                      jinja_env.globals))
+
         # New Blog Post - Validation
         if params['title'] and params['content']:
             p = entities.Blog(parent=entities.Blog.pkey(), title=params['title'], author=self.user.username,
@@ -270,9 +279,13 @@ class NewPostPage(BlogHandler):
         # Blog Post missing parameters
         else:
             if not params['title']:
-                title_error = 'Please include a title for your post.'
+                params['title_error'] = 'Please include a title for your post.'
             if not params['content']:
-                content_error = 'Please include some content in your post.'
+                params['content_error'] = 'Please include some content in your post.'
+
+            logging.debug('NewPostPage/post-missing params: params={}, jinja_env.globals={}'
+                          ''.format(params, jinja_env.globals))
+
             self.render('cupost.html', **params)
 
 class ViewPostPage(BlogHandler):
@@ -288,7 +301,9 @@ class ViewPostPage(BlogHandler):
             return
         else:
             likes, dislikes = utils.post_votes(blog)
-            comments = entities.Comment.all().ancestor(blog.key()).order('created')
+            ### Switch from doing query based on parent blog to leveraging reference property
+            # comments = entities.Comment.all().ancestor(blog.key()).order('created')
+            comments = blog.comments.order('created')
 
             # Setup environment:
             jinja_env.globals['likes'] = len(likes)
@@ -361,6 +376,9 @@ class EditPostPage(BlogHandler):
             jinja_env.globals['cu_type'] = 'Edit Existing Post'
             jinja_env.globals['new'] = False
             jinja_env.globals['ro_title'] = False
+            # In case this is present (e.g., after visiting DeletePostPage) remove
+            if jinja_env.globals.get('ro_content'):
+                del jinja_env.globals['ro_content']
             params = dict(title=blog.title, content=blog.content, tags=blog.tags)
 
             self.render('cupost.html', **params)
@@ -412,10 +430,10 @@ class EditPostPage(BlogHandler):
             # Sanity check - Blog Post missing parameters?
             have_errors = False
             if not params['title']:
-                title_error = 'Please include a title for your post.'
+                params['title_error'] = 'Please include a title for your post.'
                 have_errors = True
             if not params['content']:
-                content_error = 'Please include some content in your post.'
+                params['content_error'] = 'Please include some content in your post.'
                 have_errors = True
             if have_errors:
                 self.render('cupost.html', **params)
@@ -584,8 +602,13 @@ class NewCommentPage(BlogHandler):
             jinja_env.globals['cu_type'] = 'Create New Comment'
             jinja_env.globals['new'] = True
             jinja_env.globals['ro_title'] = True
+            # In case this is present (e.g., after visiting DeleteCommentPage) remove
+            if jinja_env.globals.get('ro_content'):
+                del jinja_env.globals['ro_content']
             params = dict(title=blog.title, content='', tags=blog.tags)
 
+            logging.debug('NewCommentPage/get - params={}, jinja_env.globals={}'.format(params,
+                          jinja_env.globals))
             self.render('cupost.html', **params)
 
     def post(self, post_id):
@@ -625,14 +648,18 @@ class NewCommentPage(BlogHandler):
 
             # New Comment - Check there's actually a comment
             if params['content']:
-                c = entities.Comment(parent=blog.key(), content=params['content'],
+                ### Switch from creating comment based strictly on parent blog to leveraging
+                #   reference property
+                # c = entities.Comment(parent=blog.key(), content=params['content'],
+                #                      author=self.user.username)
+                c = entities.Comment(parent=blog.key(), blog=blog, content=params['content'],
                             author=self.user.username)
                 c.put()
                 self.redirect('/viewpost/{}'.format(str(blog.key().id())))
                 return
             # No comment content
             else:
-                content_error = 'Please include some content in your comment.'
+                params['content_error'] = 'Please include some content in your comment.'
                 self.render('cupost.html', **params)
 
 # Edit Comment regarding Post
@@ -669,6 +696,9 @@ class EditCommentPage(BlogHandler):
             jinja_env.globals['cu_type'] = 'Edit Existing Comment'
             jinja_env.globals['new'] = False
             jinja_env.globals['ro_title'] = True
+            # In case this is present (e.g., after visiting DeleteCommentPage) remove
+            if jinja_env.globals.get('ro_content'):
+                del jinja_env.globals['ro_content']
             params = dict(title=blog.title, content=comment.content, tags=blog.tags)
 
             self.render('cupost.html', **params)
@@ -727,7 +757,7 @@ class EditCommentPage(BlogHandler):
                 return
             # No comment content
             else:
-                content_error = 'Please include some content in your comment.'
+                params['content_error'] = 'Please include some content in your comment.'
                 self.render('cupost.html', **params)
 
 # Delete Comment regarding Post

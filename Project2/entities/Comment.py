@@ -7,7 +7,7 @@ import Blog
 # Comment Entity - for GAE Datastore
 class Comment(db.Model):
     # Reference property to Blog (Blog 1-->M Comment(s))
-    user = db.ReferenceProperty(Blog.Blog, collection_name='comments')
+    blog = db.ReferenceProperty(Blog.Blog, collection_name='comments')
 
     # General properties
     author = db.StringProperty(required=True)

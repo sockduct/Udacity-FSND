@@ -112,6 +112,9 @@
         </div><!-- /.blog-post -->
       </div><!-- /.row -->
 
+      {% if pcomments %}
+        <h3 class="comments-title">Comments</h3>
+      {% endif %}
       {% for comment in comments %}
         <div class="row">
           <div class="col-md-6">

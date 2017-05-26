@@ -59,13 +59,13 @@
 
           <br>
           {% if ro_content %}
-            <button class="btn btn-lg btn-info" type="submit" name="submit" value="submit">Delete</button>
+            <button class="btn btn-lg btn-primary" type="submit" name="submit" value="submit">Delete</button>
             <button class="btn btn-lg btn-default" type="submit" name="cancel" value="cancel">Cancel</button>
           {% elif new %}
             <button class="btn btn-lg btn-primary" type="submit" name="submit" value="submit">Submit</button>
             <button class="btn btn-lg btn-default" type="submit" name="cancel" value="cancel">Cancel</button>
           {% else %}
-            <button class="btn btn-lg btn-info" type="submit" name="submit" value="submit">Update</button>
+            <button class="btn btn-lg btn-primary" type="submit" name="submit" value="submit">Update</button>
             <button class="btn btn-lg btn-default" type="submit" name="cancel" value="cancel">Cancel</button>
           {% endif %}
           <span id="helpBlock4" class="help-block help-customize">{{submit_error}}</span>
