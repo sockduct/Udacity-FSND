@@ -13,6 +13,7 @@ This project utilizes the Google App Engine Framework for Python to create a mul
 * Initialize the local environment to use your GAE Account and Project (See [App Engine Quickstart](https://cloud.google.com/appengine/docs/python/quickstart) for an example)
 * Deploy the project:  `gcloud app deploy`
 * Open the project:  `gcloud app browse`
+
 Note:  This project uses Jinja2 as a templating engine - this is built-in to the GAE Python Platform
 
 ### Project Layout
