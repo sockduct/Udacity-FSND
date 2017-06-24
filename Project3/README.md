@@ -36,6 +36,9 @@ This project uses a PostgreSQL database.  The database is initialized with an au
 * Program notes:
   * Deviations from PEP8 - I use a line length of 100 characters instead of 80.  With modern computers and monitors, I find a width of 80 characters on the small side.
 
+### Example Project Output
+* output.txt
+
 ### License
 MIT License
 
