@@ -21,9 +21,19 @@ This project uses a PostgreSQL database.  The database is initialized with an au
 
 ### Project Layout
 #### news_stats.py
-* Simple Python script
-  * Connects to database, defines queries, passes queries and formatting parameters to the get_query function which executes the queries, retrieves the results and outputs them to the console using the passed formatting parameters
-  * The main function also determines the starting and ending dates of the logs and then iterates through each day to determine if an error threshold was crossed.  It the threshold is surpassed, this is displayed to the console.
+* Using DB-API, answer following questions as defined in project:
+  1. What are the most popular three articles of all time?
+  2. Who are the most popular article authors of all time?
+  3. On which days did more than 1% of requests lead to errors?
+* Program layout:
+  * fetch_query - connect to database, query with passed parameter, fetch and return results
+  * print_top_articles - answer question one (houses single SQL query to answer)
+  * print_top_authors - answer question two (houses single SQL query to answer)
+  * print_daily_errors - answer question three (houses single SQL query to answer question)
+  * format_col - helper function for print_results, determines column formatting and width(s)
+  * print_results - helper function for print... functions from above which answer the questions, using passed parameter formats header row, header/data separator, and data rows
+  * main - if program run directly, execute print... functions from above which answer questions
+* Program notes:
   * Deviations from PEP8 - I use a line length of 100 characters instead of 80.  With modern computers and monitors, I find a width of 80 characters on the small side.
 
 ### License
