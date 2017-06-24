@@ -22,7 +22,6 @@
 #from __future__ import absolute_import      # prevent implicit relative imports in v2.x
 #from __future__ import unicode_literals     # all string literals treated as unicode strings
 from collections import namedtuple
-import datetime
 import psycopg2
 import sys
 
@@ -191,7 +190,7 @@ def format_col(value):
         htrail = 2  # Could parse out (int(value[2])), but for now always 2
     else:
         raise ValueError('Unexpected second header length type "{}".'.format(value[0]))
-    
+
     return ftype, hlen, htrail
 
 def print_results(results, cfmt=None):
@@ -203,6 +202,8 @@ def print_results(results, cfmt=None):
                 title_print = False
                 total_hlen = 0
                 for elmt in range(cfmt.count):
+                    # Note - htrail not currently used but left in for potential future
+                    #        improvements
                     ftype, hlen, htrail = format_col(cfmt.hlen[elmt])
 
                     if cfmt.quote and elmt == (cfmt.quote - 1):
