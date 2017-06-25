@@ -27,9 +27,10 @@ This project uses a PostgreSQL database.  The database is initialized with an au
   3. On which days did more than 1% of requests lead to errors?
 * Program layout:
   * fetch_query - connect to database, query with passed parameter, fetch and return results
-  * print_top_articles - answer question one (houses single SQL query to answer)
-  * print_top_authors - answer question two (houses single SQL query to answer)
-  * print_daily_errors - answer question three (houses single SQL query to answer question)
+  * print_top_articles - answer question one (houses single SQL query to answer), one optional parameter specifying the maximum number of desired results (e.g., if you pass 2, it will only show you the top 2 articles)
+  * print_top_authors - answer question two (houses single SQL query to answer), one optional parameter specifying the maximum number of desired results (e.g., if you pass 3, it will only show you the top 3 authors)
+  * print_daily_errors - answer question three (houses single SQL query to answer question), one optional parameter specifying the minimum error threshold (e.g., if you pass 2, it will only show you days where the percentage of errors is > 2%; can use integers {1, 2, 5} or floating points values {0.35, 1.7, 3.95})
+  * print_daily_stats - extra function which shows daily statistics including total number of page views/requests, number of errors and error percentage for all records/days in the database
   * format_col - helper function for print_results, determines column formatting and width(s)
   * print_results - helper function for print... functions from above which answer the questions, using passed parameter formats header row, header/data separator, and data rows
   * main - if program run directly, execute print... functions from above which answer questions
