@@ -334,9 +334,7 @@ def main(args):
         print_top_articles(3)
         print_top_authors()
         print_daily_errors(1)
-    #
-    # Available, but not part of project specifications so commenting out
-    # print_daily_stats()
+
 
 # Call main and put all logic there per best practices.
 if __name__ == '__main__':
