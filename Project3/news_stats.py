@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: ascii -*-
-# Default is ascii - explicitly coding, could also consider utf-8, latin-1, cp1252, ...
-####################################################################################################
+# Default is ascii - explicitly coding, could also consider utf-8,
+#                    latin-1, cp1252, ...
+###################################################################################################
 #
 # Python version(s) used/tested:
 # * Python 3.5.2-32 on Linux (Ubuntu 16.04.2 LTS)
 #
 # Template version used:  0.1.1
 #
-# --------------------------------------------------------------------------------------------------
+# Notes on Style:
+# * PEP 8 followed with maximum line length of 99 characters (allowable
+#   per: https://www.python.org/dev/peps/pep-0008/#maximum-line-length)
+#   * Per above, comments and docstrings must be wrapped at 72 characters
+#   * Interpreting this as just the comment/docstring text and not the
+#     leading quotes or '# '
+#
+# -------------------------------------------------------------------------------------------------
 #
 # Issues/Planned Improvements:
 # * None yet...
 #
-'''Project 3 - Log Analysis, Analyze fictitious news site to answer statistics questions'''
+'''Project 3 - Log Analysis, Analyze fictitious news site to answer
+   statistics questions'''
 
 # Imports
 # Python 2.x compatibility:
@@ -23,33 +32,37 @@
 # from __future__ import unicode_literals     # all string literals treated as unicode strings
 from collections import namedtuple
 import psycopg2
-# Importing sql this way per psycopg2 docs - sql not imported from psycopg2
+# Importing sql this way per psycopg2 docs - sql not imported from
+# psycopg2
 from psycopg2 import sql
 import sys
 
 # Globals
-# Note:  Consider using function/class/method default parameters instead of global constants where
-# it makes sense
+# Note:  Consider using function/class/method default parameters instead
+#        of global constants where it makes sense
 DB_NAME = 'news'
 
 # Metadata
 __author__ = 'James R. Small'
 __contact__ = 'james.r.small@att.com'
 __date__ = 'June 20, 2017'
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 # Data Types:
-# Note - Formatting record, used to collect all aspects of laying out columns
-#        quote indicates column data which should be quoted, currently only allows a single column
-#        of data to be quoted; value is a number representing the actual column number, e.g.,
-#        Column 1 = 1, Column 2 = 2, ... - but note, Column 1 != 0!!!  Need to do it this way so
-#        that can do boolean test - if FormatRec.quote then ..., this won't work if Column 1 = 0
+# Note - Formatting record, used to collect all aspects of laying out
+#        columns quote indicates column data which should be quoted,
+#        currently only allows a single column of data to be quoted;
+#        value is a number representing the actual column number, e.g.,
+#        Column 1 = 1, Column 2 = 2, ... - but note, Column 1 != 0!!!
+#        Need to do it this way so that can do boolean test - if
+#        FormatRec.quote then ..., this won't work if Column 1 = 0
 FormatRec = namedtuple('FormatRec', ['count', 'quote', 'headers', 'hlen'])
 
 
 def fetch_query(query, db_name=DB_NAME):
-    '''Query database using passed parameter, fetch and return reference to results.
-       Database is opened only to complete this transaction and closed upon function exit.
+    '''Query database using passed parameter, fetch and return reference to
+       results.  Database is opened only to complete this transaction and
+       closed upon function exit.
     '''
     try:
         dbconn = psycopg2.connect('dbname={}'.format(db_name))
@@ -72,15 +85,17 @@ def fetch_query(query, db_name=DB_NAME):
 def print_top_articles(number=None):
     '''Fetch top <number> articles from database and print results'''
     if not number:
-        # In PostgeSQL, using the keyword ALL in the LIMIT clause resutls in all rows being
-        # returned.  In no limit specified as a parameter, default to 'ALL'.
+        # In PostgeSQL, using the keyword ALL in the LIMIT clause results in all
+        # rows being returned.  In no limit specified as a parameter, default to
+        # 'ALL'.
         number = 'all'
-        # Note - Adding a SQL keyword to a query requires using psycopg2.sql to build a "dynamic
-        #        query"
+        # Note - Adding a SQL keyword to a query requires using psycopg2.sql to
+        #        build a "dynamic query"
         dynamic_sql = True
     else:
-        # If we're just adding a parameter to a query (limit the number to x rows) we can use the
-        # built-in literal support (we don't need to construct a dynamic SQL query)
+        # If we're just adding a parameter to a query (limit the number to x rows)
+        # we can use the built-in literal support (we don't need to construct a
+        # dynamic SQL query)
         dynamic_sql = False
 
     query = """select articles.title, num
@@ -98,7 +113,8 @@ def print_top_articles(number=None):
     results = fetch_query(query)
 
     # Formatting
-    ColFormat = FormatRec(count=2, quote=1, headers=['Article', 'Number of Views'], hlen=[34, 'n6'])
+    ColFormat = FormatRec(count=2, quote=1, headers=['Article', 'Number of Views'],
+                          hlen=[34, 'n6'])
     print_results(results, ColFormat)
 
 
@@ -111,13 +127,14 @@ def print_top_authors(number=None):
     else:
         dynamic_sql = False
 
-    query = """select authors.name, num
+    query = """select authors.name, sum(num) as total
                     from authors, articles, (select path, count(*) as num
                         from log
                         group by path) as log
                     where authors.id = articles.author and
                     articles.slug = regexp_replace(log.path, '^.*/', '')
-                    order by num desc
+                    group by authors.name
+                    order by total desc
                     limit """
     if dynamic_sql:
         query = sql.SQL('{} {};'.format(query, number))
@@ -133,8 +150,9 @@ def print_top_authors(number=None):
 
 
 def print_daily_errors(threshold=None):
-    '''Fetch daily view statistics and print days with error percentage > <threshold>.
-       Passed percentage will be converted into decimal.  e.g., 1 --> 0.01
+    '''Fetch daily view statistics and print days with error percentage >
+       <threshold>.  Passed percentage will be converted into decimal.
+       e.g., 1 --> 0.01
     '''
     if not threshold:
         threshold = 0
@@ -154,8 +172,7 @@ def print_daily_errors(threshold=None):
                         cast(daily_errs.num_errs as float) / daily_reqs.num_recs as err_prcnt
                             from daily_reqs, daily_errs
                             where daily_reqs.date = daily_errs.date
-                    ) req_err_tbl where err_prcnt > (%s);""", (threshold, )
-            )
+                    ) req_err_tbl where err_prcnt > (%s);""", (threshold, ))
     results = fetch_query(query)
 
     # Formatting
@@ -165,8 +182,8 @@ def print_daily_errors(threshold=None):
 
 
 def print_daily_stats():
-    '''Fetch daily view statistics and print out all days - total views, errors, error percentage
-       for each day.
+    '''Fetch daily view statistics and print out all days - total views,
+       errors, error percentage for each day.
     '''
     query = '''with daily_reqs as (
                     select date(time), count(*) as num_recs from log group by date(time)
@@ -193,13 +210,15 @@ def format_col(value):
     '''Format column according to encoded type:
          *    int - simple column width
          * string - encoded meaning depending on first character:
-           * d - format as date:    Month DD, YEAR (field width follows 'd' but assume 12)
-                                    12 is length of MMM DD, YEAR - MMM is abbreviated month
+           * d - format as date:    Month DD, YEAR (field width follows 'd'
+                                    but assume 12) 12 is length of MMM DD,
+                                    YEAR - MMM is abbreviated month
            * n - format as number:  d,ddd,ddd (field width follows 'n')
-           * f - format as float:   ###.## (leading and trailing digits follow 'f' but assume 32)
+           * f - format as float:   ###.## (leading and trailing digits
+                                    follow 'f' but assume 32)
     '''
-    # Default value, only altered for type 'f', represents number of digits displayed after the
-    # decimal point
+    # Default value, only altered for type 'f', represents number of digits
+    # displayed after the decimal point
     hfrac = 0
 
     if isinstance(value, int):
@@ -234,8 +253,8 @@ def print_results(results, ColFormat=None):
                 title_print = False
                 total_hlen = 0
                 for element in range(ColFormat.count):
-                    # Note - hfrac not currently used but left in for potential future
-                    #        improvements
+                    # Note - hfrac not currently used but left in for potential
+                    #        future improvements
                     postype, hlen, hfrac = format_col(ColFormat.hlen[element])
 
                     if ColFormat.quote and element == (ColFormat.quote - 1):
@@ -244,8 +263,8 @@ def print_results(results, ColFormat=None):
                     # Not last header
                     if element + 1 < ColFormat.count:
 
-                        # Check if hlen is smaller than header column with ':' - if yes than need
-                        # to increase width of hlen by one:
+                        # Check if hlen is smaller than header column with ':' - if
+                        # yes than need to increase width of hlen by one:
                         if hlen < (len(ColFormat.headers[element]) + 1):
                             hlen += 1
 
@@ -272,8 +291,8 @@ def print_results(results, ColFormat=None):
                 else:
                     col = row[element]
 
-                # Check if column data is smaller than header with ':' - if yes than need to
-                # increase width of data column by one:
+                # Check if column data is smaller than header with ':' - if yes
+                # than need to increase width of data column by one:
                 if hlen < (len(ColFormat.headers[element]) + 1):
                     hlen += 1
 
@@ -304,9 +323,17 @@ def main(args):
         2) Who are the most popular article authors of all time?
         3) On which days did more than 1% of requests lead to errors?
     '''
-    print_top_articles(3)
-    print_top_authors()
-    print_daily_errors(1)
+    # Optional test run which uses all functions and does alternate
+    # parameters to fully test their branches
+    if len(args) >= 1 and args[0] == 'test':
+        print_top_articles()
+        print_top_authors(2)
+        print_daily_errors()
+        print_daily_stats()
+    else:
+        print_top_articles(3)
+        print_top_authors()
+        print_daily_errors(1)
     #
     # Available, but not part of project specifications so commenting out
     # print_daily_stats()

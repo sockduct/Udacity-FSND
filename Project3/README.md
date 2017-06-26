@@ -35,9 +35,7 @@ This project uses a PostgreSQL database.  The database is initialized with an au
   * print_daily_stats - extra function which shows daily statistics including total number of page views/requests, number of errors and error percentage for all records/days in the database
   * format_col - helper function for print_results, determines column formatting and width(s)
   * print_results - helper function for print... functions from above which answer the questions, using passed parameter formats header row, header/data separator, and data rows
-  * main - if program run directly, execute print... functions from above which answer questions
-* Program notes:
-  * Deviations from PEP8 - I use a line length of 100 characters instead of 80.  With modern computers and monitors, I find a width of 80 characters on the small side.
+  * main - if program run directly, execute print... functions from above which answer questions, if optional "test" argument passed then use alternate function invocation to test function's other branches
 
 ### Example Project Output
 * output.txt
