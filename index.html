@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Map of Wixom, MI, USA with Points of Interest">
+    <meta name="author" content="James R. Small">
+    <link rel="icon" href="img/favicon.ico">
+
+    <title>Wixom, Michigan, USA</title>
+    <link href="css/layout.css" rel="stylesheet" type="text/css">
+    <!-- link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="css/dashboard.css" rel="stylesheet" type="text/css" -->
+    <!-- Use defer option so script loads aysnchronously and after DOM fully loaded -->
+    <script defer src="js/jquery-3.2.1.min.js"></script>
+    <!-- script defer src="js/bootstrap.min.js"></script -->
+    <script defer src="js/knockout-3.4.2.js"></script>
+    <script defer src="js/wixom-map.js"></script>
+    <script defer src="js/menu.js"></script>
+    <!-- Note:  Loading places, geometry, and drawing libraries - used in wixom-app.js
+                Load after wixom-app.js since it's using callback defined there -->
+    <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=initMap&libraries=places,geometry,drawing"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="options-box">
+        <h1>Wixom, Michigan, USA</h1>
+        <div>
+          <input id="show-pois" type="button" value="Show Points of Interest">
+          <input id="hide-pois" type="button" value="Hide Points of Interest">
+        </div>
+        <hr>
+        <div>
+          <h2>Points of Interest</h2>
+          <ul>
+            <li><input id="poi-filter" type="textbox" value="Filter, e.g., Vista"></li>
+          </ul>
+          <ul data-bind="foreach: poiList">
+            <li data-bind="click: $parent.updateCurrentPoi, text: title"></li>
+          </ul>
+        </div>
+      </div>
+      <!-- A div with the id of "map" is used by Google Maps -->
+      <!-- Appears it doesn't like being within a grid... -->
+      <div id="map"></div>
+    </div>
+  </body>
+</html>
