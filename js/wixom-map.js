@@ -4,30 +4,25 @@
 
 'use strict';
 
-// Hold representation of Google Map
-var map;
+// Hold representation of Google Map and InfoWindow
+var map, largeInfoWindow;
 
-// Array to hold listing markers:
+// Array to hold marker locations:
 var markers = [];
-
-// Create placemarkers array to use in multiple functions to have control
-// over the number of places that show.
-var placeMarkers = [];
 
 function initMap() {
     // Constructor creates a new map - only center and zoom are required
     // Need to specify where to load map (using #map here)
     // Need to also specify coordinates - center & zoom values (0-22)
     var mapDiv = $('#map');  // jQuery returns collection of 0 or 1
-    var mapDivNative = document.getElementById('map');
-    var wixom = {lat: 42.524970, lng: -83.536211};  // Try 13
-    var largeInfoWindow = new google.maps.InfoWindow();
+    var wixom = {lat: 42.524970, lng: -83.536211};  // Use zoom of 13
+    largeInfoWindow = new google.maps.InfoWindow();
     // Allow adjusting map boundaries as necessary if things outside initial map area
     // This captures SW and NE corners of viewport
     var bounds = new google.maps.LatLngBounds();
 
     // Custom icons
-    // Style the markers - this will be listing marker icon
+    // Style the marker icons
     var defaultIcon = makeMarkerIcon('0091ff');
     // This will be a "highlighted location" marker color for when user mouses
     // over the marker
@@ -36,48 +31,7 @@ function initMap() {
     map = new google.maps.Map(mapDiv[0], {
         center: wixom,
         zoom: 13
-        /*
-        // Choose styles or this:
-        mapTypeControlOptions: {
-            mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'styled_map']
-        }
-        */
-        // Prevent user from changing map type (only if choose styles)
-        // mapTypeControl: false
     });
-
-    // Associate the styled map with the MapTypeId and set it to display
-    // (Only if choose mapTypeControlOptions)
-    /*
-    map.mapTypes.set('styled_map', styledMapType);
-    map.setMapTypeId('styled_map');
-    */
-
-    /*
-    // First example showing only a single point:
-    var tribeca = {lat: 40.719526, lng: -74.0089934};
-
-    // Create a marker on the map to show a point (Tribeca):
-    var marker = new google.maps.Marker({
-        // Which coordinates should marker appear at?
-        position: tribeca,
-        // Which map should marker appear on?
-        map: map,
-        // Title which appears if hover over marker:
-        title: 'First Marker!'
-        // Many more options - see API docs
-    });
-    // InfoWindow's don't open automatically like markers
-    var infowindow = new google.maps.InfoWindow({
-        content: 'Do you ever feel like an InfoWindow, floating through the wind, ' +
-            'ready to start again?'
-    });
-
-    // Open InfoWindow when user clicks on marker
-    marker.addListener('click', function() {
-        infowindow.open(map, marker);
-    });
-    */
 
     for (var i = 0; i < pointsOfInterest.length; i++) {
         // Get the position from the location array.
@@ -85,13 +39,13 @@ function initMap() {
         var title = pointsOfInterest[i].title;
         // Create a marker per location, and put into markers array.
         var marker = new google.maps.Marker({
-            // Eliminated this when added showListings()
-            // map: map,
+            map: map,
             position: position,
             title: title,
             animation: google.maps.Animation.DROP,
             icon: defaultIcon,
-            id: i
+            // id: i
+            id: pointsOfInterest[i].place
         });
 
         // Push the marker to our array of markers.
@@ -110,19 +64,23 @@ function initMap() {
         marker.addListener('mouseout', function() {
             this.setIcon(defaultIcon);
         });
-        // Extend map boundary for each marker - moved to showListings()
-        // bounds.extend(markers[i].position);
     }
+}
 
-    // Adjust map to fit all markers - moved to showListings()
-    // map.fitBounds(bounds);
+// This function takes in a COLOR, and then creates a new marker
+// icon of that color. The icon will be 21 px wide by 34 high, have an origin
+// of 0, 0 and be anchored at 10, 34).
+function makeMarkerIcon(markerColor) {
+    var markerImage = new google.maps.MarkerImage(
+        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+            '|40|_|%E2%80%A2',
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(10, 34),
+        new google.maps.Size(21, 34)
+    );
 
-    document.getElementById('show-pois').addEventListener('click', showListings);
-    // Replaced hideListings with hideMarkers
-    // document.getElementById('hide-listings').addEventListener('click', hideListings);
-    document.getElementById('hide-pois').addEventListener('click', function() {
-        hideMarkers(markers);
-    });
+    return markerImage;
 }
 
 // This function populates the infowindow when the marker is clicked. We'll only allow
@@ -184,43 +142,6 @@ function populateInfoWindow(marker, infowindow) {
     }
 }
 
-// This function will loop through the markers array and display them all.
-function showListings() {
-    var bounds = new google.maps.LatLngBounds();
-
-    // Extend the boundaries of the map for each marker and display the marker
-    for (var i = 0; i < markers.length; i++) {
-        markers[i].setMap(map);
-        bounds.extend(markers[i].position);
-    }
-
-    map.fitBounds(bounds);
-}
-
-// This function will loop through the listings and hide them all.
-// function hideListings() { - renamed to hideMarkers to make more generic
-function hideMarkers(markers) {
-    for (var i = 0; i < markers.length; i++) {
-        markers[i].setMap(null);
-    }
-}
-
-// This function takes in a COLOR, and then creates a new marker
-// icon of that color. The icon will be 21 px wide by 34 high, have an origin
-// of 0, 0 and be anchored at 10, 34).
-function makeMarkerIcon(markerColor) {
-    var markerImage = new google.maps.MarkerImage(
-        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
-            '|40|_|%E2%80%A2',
-        new google.maps.Size(21, 34),
-        new google.maps.Point(0, 0),
-        new google.maps.Point(10, 34),
-        new google.maps.Size(21, 34)
-    );
-
-    return markerImage;
-}
-
 // This is the PLACE DETAILS search - it's the most detailed so it's only
 // executed when a marker is selected, indicating the user wants more
 // details about that place.
@@ -234,12 +155,14 @@ function getPlacesDetails(marker, infowindow) {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
             // Set the marker property on this infowindow so it isn't created again.
             infowindow.marker = marker;
-            var innerHTML = '<div>';
+            var innerHTML = '<div><strong>' + marker.title + '</strong>';
             // For each potential information element from places details, need to check
             // if it's present - it may or may not be
+            /* Use marker.title instead
             if (place.name) {
                 innerHTML += '<strong>' + place.name + '</strong>';
             }
+            */
             if (place.formatted_address) {
                 innerHTML += '<br>' + place.formatted_address;
             }

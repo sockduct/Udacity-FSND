@@ -10,12 +10,12 @@
     <link rel="icon" href="img/favicon.ico">
 
     <title>Wixom, Michigan, USA</title>
-    <link href="css/layout.css" rel="stylesheet" type="text/css">
-    <!-- link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="css/dashboard.css" rel="stylesheet" type="text/css" -->
+    <!-- link href="css/layout.css" rel="stylesheet" type="text/css" -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="css/dashboard.css" rel="stylesheet" type="text/css">
     <!-- Use defer option so script loads aysnchronously and after DOM fully loaded -->
     <script defer src="js/jquery-3.2.1.min.js"></script>
-    <!-- script defer src="js/bootstrap.min.js"></script -->
+    <script defer src="js/bootstrap.min.js"></script>
     <script defer src="js/knockout-3.4.2.js"></script>
     <script defer src="js/wixom-map.js"></script>
     <script defer src="js/menu.js"></script>
@@ -24,27 +24,37 @@
     <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=initMap&libraries=places,geometry,drawing"></script>
   </head>
   <body>
+    <!-- div class="container-fluid" -->
     <div class="container">
-      <div class="options-box">
-        <h1>Wixom, Michigan, USA</h1>
-        <div>
-          <input id="show-pois" type="button" value="Show Points of Interest">
-          <input id="hide-pois" type="button" value="Hide Points of Interest">
-        </div>
-        <hr>
-        <div>
-          <h2>Points of Interest</h2>
-          <ul>
-            <li><input id="poi-filter" type="textbox" value="Filter, e.g., Vista"></li>
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <!-- Sidebar header -->
+          <ul class="nav nav-sidebar">
+            <li><a href="">Wixom, Michigan, USA</a></li>
+            <li class="active"><a href="">Points of Interest</a></li>
+            <!-- li><a href="#"><input id="show-pois" type="button" value="Show Points of Interest"></a></li>
+            <li><a href="#"><input id="hide-pois" type="button" value="Hide Points of Interest"></a></li -->
           </ul>
-          <ul data-bind="foreach: poiList">
-            <li data-bind="click: $parent.updateCurrentPoi, text: title"></li>
+          <ul class="nav nav-sidebar">
+            <form class="form-inline">
+              <div class="form-group">
+                <label class="sr-only" for="inputFilter">Filter Text</label>
+                <input type="text" id="filter-text" class="form-control" placeholder="Filter, e.g., Vista">
+              </div>
+              <button type="submit" id="filter-button" class="btn btn-success">Filter</button>
+            </form>
+          </ul>
+          <ul class="nav nav-sidebar" data-bind="foreach: poiList">
+            <!-- li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li -->
+            <li><a href="#" data-bind="click: $parent.updateCurrentPoi, text: title"></a></li>
           </ul>
         </div>
+        <!-- div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        </div -->
       </div>
-      <!-- A div with the id of "map" is used by Google Maps -->
-      <!-- Appears it doesn't like being within a grid... -->
-      <div id="map"></div>
     </div>
+    <!-- A div with the id of "map" is used by Google Maps -->
+    <!-- Appears it doesn't like being within a container if height is 100%... -->
+    <div id="map"></div>
   </body>
 </html>
