@@ -72,6 +72,7 @@ var viewModel = function() {
             if (pointsOfInterest[i].title === clickedPoi.title()) {
                 // populateInfoWindow(markers[i], largeInfoWindow);
                 getPlacesDetails(markers[i], largeInfoWindow);
+                getPhotos(clickedPoi.title);
                 break;
             }
         }

@@ -183,6 +183,8 @@ function getPlacesDetails(marker, infowindow) {
                 innerHTML += '<br><br><img src="' + place.photos[0].getUrl(
                     {maxHeight: 100, maxWidth: 200}) + '">';
             }
+            // Add a photo place holder
+            innerHTML += '<br><br><img src="" alt="Checking for Flickr Photos..." id="flick-photo-window">';
             innerHTML += '</div>';
             infowindow.setContent(innerHTML);
             infowindow.open(map, marker);
@@ -192,4 +194,51 @@ function getPlacesDetails(marker, infowindow) {
             });
         }
     });
+}
+
+// Query Flickr for place phots
+function getPhotos(title) {
+    // Photo Search API Endpoint:
+    // https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=<key>&text=<title>&format=json&nojsoncallback=1
+    // var encodedTitle = encodeURI(title);
+    var photoQueryURL = 'https://api.flickr.com/services/rest/?' + $.param({
+        'method': 'flickr.photos.search',
+        'api_key': flickrAPIKey,
+        'text': title,
+        'tags': title,
+        'format': 'json',
+        'nojsoncallback': '1'
+    });
+    // Photo Retrieval:
+    // m = 240px max, n = 320px max
+    // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_m.jpg'
+    // Could use template literals, but no IE support...
+
+    // AJAX Query:
+    $.ajax(photoQueryURL)
+        .done(function(data) {
+            console.log('Sucessful query.');
+            console.log(data);
+            // Check status code - both good and bad
+            // Check for results - handle 0, 1, and multiple
+            // Update photo div appropriately
+        })
+        .fail(function(err) {
+            console.log('Failed query.');
+            console.log(err);
+            // Update photo div appropriately (Flickr unavailable...)
+        });
+
+    // Update photo div src to load first photo
+    // If more than 1 add prev/next buttons
+    /* Notes:
+    Example JSON Response:
+    { "photos": { "page": 1, "pages": 1, "perpage": 100, "total": 50,
+        "photo": [
+          { "id": "11876531065", "owner": "88636811@N06", "secret": "b23b77d7a1", "server": "7390", "farm": 8, "title": "cold", "ispublic": 1, "isfriend": 0, "isfamily": 0 },
+          (...),
+          { "id": "92265376", "owner": "39832458@N00", "secret": "3e07aa0323", "server": 13, "farm": 1, "title": "habitat5", "ispublic": 1, "isfriend": 0, "isfamily": 0 }
+        ] },
+     "stat": "ok" }
+    */
 }
