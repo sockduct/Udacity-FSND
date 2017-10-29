@@ -184,7 +184,7 @@ function getPlacesDetails(marker, infowindow) {
                     {maxHeight: 100, maxWidth: 200}) + '">';
             }
             // Add a photo place holder
-            innerHTML += '<br><br><img src="" alt="Checking for Flickr Photos..." id="flick-photo-window">';
+            innerHTML += '<br><br><img src="" alt="Checking for Flickr Photos..." id="flickr-photo">';
             innerHTML += '</div>';
             infowindow.setContent(innerHTML);
             infowindow.open(map, marker);
@@ -205,7 +205,7 @@ function getPhotos(title) {
         'method': 'flickr.photos.search',
         'api_key': flickrAPIKey,
         'text': title,
-        'tags': title,
+        // 'tags': title,
         'format': 'json',
         'nojsoncallback': '1'
     });
@@ -217,11 +217,35 @@ function getPhotos(title) {
     // AJAX Query:
     $.ajax(photoQueryURL)
         .done(function(data) {
+            var flickrPhoto = $('#flickr-photo');
             console.log('Sucessful query.');
             console.log(data);
             // Check status code - both good and bad
             // Check for results - handle 0, 1, and multiple
+            // If get 0 results, try requerying without last word
+            // e.g., Wixom Habitat instead of Wixom Habitat Vista
+            if (Number(data.photos.total) === 0 && title.split(' ').length > 2) {
+                console.log('In if check of getPhotos...');
+                var newTitle = title.slice(0, title.lastIndexOf(' '));
+                getPhotos(newTitle);
+            }
             // Update photo div appropriately
+            switch (Number(data.photos.total)) {
+                case 0:
+                    flickrPhoto.attr('alt', 'No Flickr Photos found.  :-(');
+                    break;
+                case 1:
+                    var photoArray = data.photos.photo;
+                    flickrPhoto.attr({
+                        alt: 'Flickr Photo',
+                        src: 'https://farm' + photoArray[0].farm + '.staticflickr.com/' + photoArray[0].server + '/' + photoArray[0].id + '_' + photoArray[0].secret + '_m.jpg'
+                    });
+                    // Fall through to add next/prev buttons
+                    // break;
+                // 2 or more
+                default:
+                    console.log('Made it to default case - ' + data.photos.total + ' Flickr photos available.');
+            }
         })
         .fail(function(err) {
             console.log('Failed query.');

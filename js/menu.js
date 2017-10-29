@@ -71,8 +71,9 @@ var viewModel = function() {
         for (var i = 0; i < pointsOfInterest.length; i++) {
             if (pointsOfInterest[i].title === clickedPoi.title()) {
                 // populateInfoWindow(markers[i], largeInfoWindow);
+                // Try collecting photos first and then passing into getPlacesDetails
                 getPlacesDetails(markers[i], largeInfoWindow);
-                getPhotos(clickedPoi.title);
+                getPhotos(clickedPoi.title());
                 break;
             }
         }
