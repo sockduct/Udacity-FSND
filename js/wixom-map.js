@@ -147,177 +147,25 @@ function getPlacesDetails(marker, infowindow) {
                 infowindow.marker = null;
             });
 
-            // Retrieve Flickr Photo
-            var photoQueryURL = 'https://api.flickr.com/services/rest/?' + $.param({
-                'method': 'flickr.photos.search',
-                'api_key': flickrAPIKey,
-                'text': marker.title,
-                // 'tags': title,
-                'format': 'json',
-                'nojsoncallback': '1'
-            });
+            // First call:
+            getPhotos(marker.title, iwcontent, infowindow);
 
-            // AJAX Query:
-            // Consider setting timeout - not sure what default timeout is
-            $.ajax(photoQueryURL)
-                .done(function(data) {
-                    var photoIndex = 0;
-                    console.log('Sucessful query.');
-                    console.log(data);
-
-                    // Check status code - both good and bad
-                    // Check for results - handle 0, 1, and multiple
-                    // If get 0 results, try requerying without last word
-                    // e.g., Wixom Habitat instead of Wixom Habitat Vista
-                    /*
-                    if (Number(data.photos.total) === 0 && marker.title.split(' ').length > 2) {
-                        console.log('In if check of getPhotos...');
-                        var newTitle = marker.title.slice(0, title.lastIndexOf(' '));
-                        getPhotos(newTitle, marker, infowindow, iwcontent);
-                    }
-                    */
-
-                    if (data.stat !== "ok") {
-                        data.photos.total = "-1";
-                    }
-
-                    // Update photo div appropriately
-                    switch (data.photos.total) {
-                        case '-1':
-                            console.log('Case -1...');
-                            iwcontent.find('#flickr-photo').attr('alt', 'Error retrieving Flickr Photo.')
-                            break;
-                        case '0':
-                            console.log('Case 0...');
-                            iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found - Trying again with more general search...');
-                            break;
-                        // Later on for case 1, just want photo and no buttons
-                        case '1':
-                            console.log('Case 1...');
-                        // Later on for case 2+, want photo and forward/back buttons
-                        default:
-                            console.log('Made it to default case - ' + data.photos.total + ' Flickr photos available.');
-                            var photoArray = data.photos.photo;
-                            iwcontent.find('#flickr-photo').attr({
-                                'alt': 'Flickr Photo',
-                                'src': 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg'
-                            });
-                            iwcontent.append('<br>Source:  Flickr Photo API');
-                            iwcontent.append('<br><button id="prev-photo" type="button">Previous</button> Flickr Photo <button id="next-photo" type="button">Next</button>');
-                    }
-                    $('#prev-photo').on('click', function() {
-                        if (photoIndex > 0) {
-                            photoIndex--;
-
-                            iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
-
-                            console.log('photoIndex now:  ' + photoIndex);
-                        } else {
-                            console.log('photoIndex already at beginning (' + photoIndex + ')');
-                        }
-                    });
-                    $('#next-photo').on('click', function() {
-                        if (photoIndex < Number(data.photos.total) - 1) {
-                            photoIndex++;
-
-                            iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
-
-                            console.log('photoIndex now:  ' + photoIndex);
-                        } else {
-                            console.log('photoIndex already at end (' + photoIndex + ')');
-                        }
-                    });
-                    console.log('iwcontent now:');
-                    console.log(iwcontent[0]);
-                    infowindow.setContent(iwcontent[0]);
-                    infowindow.open(map, marker);
-
-                    // Update photo div src to load first photo
-                    // If more than 1 add prev/next buttons
-                    /* Notes:
-                    Example JSON Response:
-                    { "photos": { "page": 1, "pages": 1, "perpage": 100, "total": 50,
-                        "photo": [
-                          { "id": "11876531065", "owner": "88636811@N06", "secret": "b23b77d7a1", "server": "7390", "farm": 8, "title": "cold", "ispublic": 1, "isfriend": 0, "isfamily": 0 },
-                          (...),
-                          { "id": "92265376", "owner": "39832458@N00", "secret": "3e07aa0323", "server": 13, "farm": 1, "title": "habitat5", "ispublic": 1, "isfriend": 0, "isfamily": 0 }
-                        ] },
-                     "stat": "ok" }
-                    */
-                })
-                .fail(function(errReq, errStat) {
-                    console.log('Query with status of ' + errStat);
-                    console.log(errReq);
-                    // Update photo div appropriately (Flickr unavailable...)
-                })
-                .always(function(data, status) {
-                    console.log('In always method of AJAX query, status of ' + status + ', data:');
-                    console.log(data);
-
-                    if (data.photos.total === '0') {
-                        // Retrieve Updated Flickr Photo
-                        var photoQueryURL = 'https://api.flickr.com/services/rest/?' + $.param({
-                            'method': 'flickr.photos.search',
-                            'api_key': flickrAPIKey,
-                            'text': marker.title.slice(0, marker.title.lastIndexOf(' ')),
-                            // 'tags': title,
-                            'format': 'json',
-                            'nojsoncallback': '1'
-                        });
-
-                        $.ajax(photoQueryURL)
-                            .done(function(data) {
-                                console.log('Sucessful query.');
-                                console.log(data);
-
-                                if (data.stat !== "ok") {
-                                    data.photos.total = "-1";
-                                }
-
-                                // Update photo div appropriately
-                                switch (data.photos.total) {
-                                    case '-1':
-                                        console.log('Case -1...');
-                                        iwcontent.find('#flickr-photo').attr('alt', 'Error retrieving Flickr Photo.')
-                                        break;
-                                    case '0':
-                                        console.log('Case 0...');
-                                        iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found - Trying again with more general search...');
-                                        break;
-                                    // Later on for case 1, just want photo and no buttons
-                                    case '1':
-                                        console.log('Case 1...');
-                                    // Later on for case 2+, want photo and forward/back buttons
-                                    default:
-                                        console.log('Made it to default case - ' + data.photos.total + ' Flickr photos available.');
-                                        var photoArray = data.photos.photo;
-                                        iwcontent.find('#flickr-photo').attr({
-                                            'alt': 'Flickr Photo',
-                                            'src': 'https://farm' + photoArray[0].farm + '.staticflickr.com/' + photoArray[0].server + '/' + photoArray[0].id + '_' + photoArray[0].secret + '_m.jpg'
-                                        });
-                                        iwcontent.append('<br>Source:  Flickr Photo API');
-                                }
-                                console.log('iwcontent now:');
-                                console.log(iwcontent[0]);
-                                infowindow.setContent(iwcontent[0]);
-                                infowindow.open(map, marker);
-                            })
-                            .fail(function(err) {
-                                console.log('Failed query from .always');
-                                console.log(err);
-                            });
-                    }
-                });
+            /* Update photo div appropriately
+            switch (data.photos.total) {
+                case '-1':
+                    iwcontent.find('#flickr-photo').attr('alt', 'Error retrieving Flickr Photo.')
+                case '0':
+                    iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found - Trying again with more general search...');
+            }
+            */
         }
     });
 }
 
 // Query Flickr for place photos
-function getPhotos(title, marker, infowindow, iwcontent) {
+function getPhotos(title, iwcontent, infowindow) {
     // Photo Search API Endpoint:
     // https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=<key>&text=<title>&format=json&nojsoncallback=1
-    // var encodedTitle = encodeURI(title);
-
     var photoQueryURL = 'https://api.flickr.com/services/rest/?' + $.param({
         'method': 'flickr.photos.search',
         'api_key': flickrAPIKey,
@@ -327,10 +175,127 @@ function getPhotos(title, marker, infowindow, iwcontent) {
         'nojsoncallback': '1'
     });
 
-    // Photo Retrieval:
-    // m = 240px max, n = 320px max
-    // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_m.jpg'
-    // Could use template literals, but no IE support...
-
     // AJAX Query:
+    // Consider setting timeout - not sure what default timeout is
+    $.ajax(photoQueryURL)
+        .done(function(data) {
+            console.log('Sucessful query.');
+            console.log(data);
+
+            // Check status code - both good and bad
+            // Check for results - handle 0, 1, and multiple
+            // If get 0 results, try requerying without last word
+            // e.g., Wixom Habitat instead of Wixom Habitat Vista
+            /*
+            if (Number(data.photos.total) === 0 && marker.title.split(' ').length > 2) {
+                console.log('In if check of getPhotos...');
+                var newTitle = marker.title.slice(0, title.lastIndexOf(' '));
+                getPhotos(newTitle, marker, infowindow, iwcontent);
+            }
+            */
+
+            if (data.stat !== "ok") {
+                data.photos.total = "-1";
+            }
+        })
+        .fail(function(errReq, errStat) {
+            console.log('Query with status of ' + errStat);
+            console.log(errReq);
+            // Update photo div appropriately (Flickr unavailable...)
+        })
+        .always(function(data) {
+            // Error handling - if data missing this, then add it:
+            // var data = {'photos': {'total': "-1"}};
+
+            installPhotos(data, iwcontent, infowindow);
+
+            if (data.photos.total === '0' && title.split(' ').length > 2) {
+                var newTitle = title.slice(0, title.lastIndexOf(' '));
+                // Retry with more general title search
+                getPhotos(newTitle, iwcontent, infowindow);
+            }
+        });
+}
+
+function installPhotos(data, iwcontent, infowindow) {
+    // Update photo div appropriately
+    var photoIndex = 0;
+
+    switch (data.photos.total) {
+        case '-1':
+            console.log('Case -1...');
+            iwcontent.find('#flickr-photo').attr('alt', 'Error retrieving Flickr Photo.')
+            break;
+        case '0':
+            console.log('Case 0...');
+            iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found - Trying again with more general search...');
+            break;
+        // Later on for case 1, just want photo and no buttons
+        case '1':
+            console.log('Case 1...');
+        // Later on for case 2+, want photo and forward/back buttons
+        default:
+            console.log('Made it to default case - ' + data.photos.total + ' Flickr photos available.');
+
+            // Photo Retrieval:
+            // m = 240px max, n = 320px max
+            // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_m.jpg'
+            // Could use template literals, but no IE support...
+            var photoArray = data.photos.photo;
+            iwcontent.find('#flickr-photo').attr({
+                'alt': 'Flickr Photo',
+                'src': 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg'
+            });
+            iwcontent.append('<br>Source:  Flickr Photo API');
+            iwcontent.append('<br><br><button id="prev-photo" type="button" disabled>Previous</button> Flickr Photo <span id="photo-num">' + (photoIndex + 1) + '</span> of ' + data.photos.total + ' <button id="next-photo" type="button">Next</button>');
+    }
+    $('#prev-photo').on('click', function() {
+        if (photoIndex > 0) {
+            photoIndex--;
+
+            iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
+            iwcontent.find('#photo-num').text(photoIndex + 1);
+            if (photoIndex + 1 === Number(data.photos.total) - 1) {
+                console.log('Enabling next button...');
+                iwcontent.find('#next-photo').removeAttr('disabled');
+            }
+            if (photoIndex === 0) {
+                console.log('Disabling previous button...');
+                iwcontent.find('#prev-photo').attr('disabled', true);
+            }
+        }
+    });
+    $('#next-photo').on('click', function() {
+        if (photoIndex < Number(data.photos.total) - 1) {
+            photoIndex++;
+
+            iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
+            iwcontent.find('#photo-num').text(photoIndex + 1);
+            if (photoIndex === 1) {
+                console.log('Enabling previous button...');
+                iwcontent.find('#prev-photo').removeAttr('disabled');
+            }
+            if (photoIndex + 1 === Number(data.photos.total)) {
+                console.log('Disabling next button...');
+                iwcontent.find('#next-photo').attr('disabled', true);
+            }
+        }
+    });
+    console.log('iwcontent now:');
+    console.log(iwcontent[0]);
+    infowindow.setContent(iwcontent[0]);
+    // infowindow.open(map, marker);
+
+    // Update photo div src to load first photo
+    // If more than 1 add prev/next buttons
+    /* Notes:
+    Example JSON Response:
+    { "photos": { "page": 1, "pages": 1, "perpage": 100, "total": 50,
+        "photo": [
+          { "id": "11876531065", "owner": "88636811@N06", "secret": "b23b77d7a1", "server": "7390", "farm": 8, "title": "cold", "ispublic": 1, "isfriend": 0, "isfamily": 0 },
+          (...),
+          { "id": "92265376", "owner": "39832458@N00", "secret": "3e07aa0323", "server": 13, "farm": 1, "title": "habitat5", "ispublic": 1, "isfriend": 0, "isfamily": 0 }
+        ] },
+     "stat": "ok" }
+    */
 }
