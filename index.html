@@ -20,12 +20,11 @@
     <script defer src="js/wixom-map.js"></script>
     <script defer src="js/menu.js"></script>
     <script defer src="js/keys.js"></script>
-    <!-- Note:  Loading places, geometry, and drawing libraries - used in wixom-app.js
+    <!-- Note:  Loading places library - used in wixom-app.js
                 Load after wixom-app.js since it's using callback defined there -->
-    <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=initMap&libraries=places,geometry,drawing"></script>
+    <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=initMap&libraries=places" onerror="initMapError()"></script>
   </head>
   <body>
-    <!-- div class="container-fluid" -->
     <div class="container">
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
@@ -33,8 +32,6 @@
           <ul class="nav nav-sidebar">
             <li><a href="">Wixom, Michigan, USA</a></li>
             <li class="active"><a href="">Points of Interest</a></li>
-            <!-- li><a href="#"><input id="show-pois" type="button" value="Show Points of Interest"></a></li>
-            <li><a href="#"><input id="hide-pois" type="button" value="Hide Points of Interest"></a></li -->
           </ul>
           <ul class="nav nav-sidebar">
             <form class="form-inline">

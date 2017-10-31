@@ -34,9 +34,7 @@ var viewModel = function() {
     this.filterText = $('#filter-text');
     this.filterBtn = $('#filter-button');
     this.poiList = ko.observableArray([]);
-    // this.currentPoi = null;  // Can't start out with null - must be observable
     this.currentPoi = ko.observable();  // Start out with no POI set
-    // this.currentPoi = ko.observable(this.poiList()[0]);
 
     this.populatePoiList = function(filterString) {
         var re1 = new RegExp(filterString, 'i');
@@ -71,22 +69,10 @@ var viewModel = function() {
 
         for (var i = 0; i < pointsOfInterest.length; i++) {
             if (pointsOfInterest[i].title === clickedPoi.title()) {
-                // populateInfoWindow(markers[i], largeInfoWindow);
-                // Try collecting photos first and then passing into getPlacesDetails
-                // This won't work because getPhotos is asynchronous
-                /* var photoData = getPhotos(clickedPoi.title());
-                if ('error' in photoData) {
-                    imgAltText = 'Unable to access Flickr Photo Service';
-                } else if (Number(photoData.photos.total) === 0 && title.split(' ').length > 2) {
-                    var newTitle = title.slice(0, title.lastIndexOf(' '));
-                    getPhotos(newTitle);
-                }
-                */
                 resetMarkerIcons();
                 markers[i].setAnimation(google.maps.Animation.DROP);
                 markers[i].setIcon(highlightedIcon);
                 getPlacesDetails(markers[i], largeInfoWindow);
-                // getPhotos(clickedPoi.title(), markers[i], largeInfoWindow, iwcontent);
                 break;
             }
         }
@@ -113,8 +99,6 @@ var viewModel = function() {
         }
 
         self.populatePoiList(filterTextVal);
-        // console.log('You submitted:  ' + filterTextVal);
-
         // Do last - remember applied filter:
         filterRecall = filterTextVal;
     });

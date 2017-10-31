@@ -69,6 +69,11 @@ function initMap() {
     }
 }
 
+function initMapError() {
+    var mapDiv = $('#map');
+    mapDiv.append('<h2><em>Unable to load map from Google Maps API </em> :-(</h2>');
+}
+
 // This function takes in a COLOR, and then creates a new marker
 // icon of that color. The icon will be 21 px wide by 34 high, have an origin
 // of 0, 0 and be anchored at 10, 34).
@@ -102,14 +107,14 @@ function getPlacesDetails(marker, infowindow) {
     service.getDetails({
         placeId: marker.id
     }, function(place, status) {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-            // Set the marker property on this infowindow so it isn't created again.
-            infowindow.marker = marker;
+        // Set the marker property on this infowindow so it isn't created again.
+        infowindow.marker = marker;
 
-            // Use jQuery to create new div/DOM element
-            var iwcontent = $('<div></div>');
-            iwcontent.attr('id', 'outer-iwcontent');
-            iwcontent.append('<strong>' + marker.title + '</strong>');
+        // Use jQuery to create new div/DOM element
+        var iwcontent = $('<div></div>');
+        iwcontent.attr('id', 'outer-iwcontent');
+        iwcontent.append('<strong>' + marker.title + '</strong>');
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
             // For each potential information element from places details, need to check
             // if it's present - it may or may not be
             /* Use marker.title instead
@@ -138,27 +143,20 @@ function getPlacesDetails(marker, infowindow) {
                 iwcontent.append('<br><br><img src="' + place.photos[0].getUrl({maxHeight: 100, maxWidth: 200}) + '">');
             }
             */
-            // Add a photo place holder
-            iwcontent.append('<br><br><img src="" id="flickr-photo" alt="Checking for Flickr Photos..."></img>');
-            infowindow.setContent(iwcontent[0]);
-            infowindow.open(map, marker);
-            // Make sure the marker property is cleared if the infowindow is closed.
-            infowindow.addListener('closeclick', function() {
-                infowindow.marker = null;
-            });
-
-            // First call:
-            getPhotos(marker.title, iwcontent, infowindow);
-
-            /* Update photo div appropriately
-            switch (data.photos.total) {
-                case '-1':
-                    iwcontent.find('#flickr-photo').attr('alt', 'Error retrieving Flickr Photo.')
-                case '0':
-                    iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found - Trying again with more general search...');
-            }
-            */
+        } else {
+            iwcontent.append('<br><br><em>Unable to load data from Google Maps, Places API</em>')
         }
+
+        // Add a photo place holder
+        iwcontent.append('<br><br><img src="" id="flickr-photo" alt="Checking for Flickr Photos..."></img>');
+        infowindow.setContent(iwcontent[0]);
+        infowindow.open(map, marker);
+        // Make sure the marker property is cleared if the infowindow is closed.
+        infowindow.addListener('closeclick', function() {
+            infowindow.marker = null;
+        });
+
+        getPhotos(marker.title, iwcontent, infowindow);
     });
 }
 
@@ -179,9 +177,6 @@ function getPhotos(title, iwcontent, infowindow) {
     // Consider setting timeout - not sure what default timeout is
     $.ajax(photoQueryURL)
         .done(function(data) {
-            console.log('Sucessful query.');
-            console.log(data);
-
             // Check status code - both good and bad
             // Check for results - handle 0, 1, and multiple
             // If get 0 results, try requerying without last word
@@ -228,15 +223,9 @@ function installPhotos(data, iwcontent, infowindow) {
             break;
         case '0':
             console.log('Case 0...');
-            iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found - Trying again with more general search...');
+            iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found...');
             break;
-        // Later on for case 1, just want photo and no buttons
-        case '1':
-            console.log('Case 1...');
-        // Later on for case 2+, want photo and forward/back buttons
         default:
-            console.log('Made it to default case - ' + data.photos.total + ' Flickr photos available.');
-
             // Photo Retrieval:
             // m = 240px max, n = 320px max
             // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_m.jpg'
@@ -247,54 +236,50 @@ function installPhotos(data, iwcontent, infowindow) {
                 'src': 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg'
             });
             iwcontent.append('<br>Source:  Flickr Photo API');
-            iwcontent.append('<br><br><button id="prev-photo" type="button" disabled>Previous</button> Flickr Photo <span id="photo-num">' + (photoIndex + 1) + '</span> of ' + data.photos.total + ' <button id="next-photo" type="button">Next</button>');
+
+            if (Number(data.photos.total) > 1) {
+                iwcontent.append('<br><br><button id="prev-photo" type="button" disabled>Previous</button> Flickr Photo <span id="photo-num">' + (photoIndex + 1) + '</span> of ' + data.photos.total + ' <button id="next-photo" type="button">Next</button>');
+            }
     }
-    $('#prev-photo').on('click', function() {
-        if (photoIndex > 0) {
-            photoIndex--;
 
-            iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
-            iwcontent.find('#photo-num').text(photoIndex + 1);
-            if (photoIndex + 1 === Number(data.photos.total) - 1) {
-                console.log('Enabling next button...');
-                iwcontent.find('#next-photo').removeAttr('disabled');
-            }
-            if (photoIndex === 0) {
-                console.log('Disabling previous button...');
-                iwcontent.find('#prev-photo').attr('disabled', true);
-            }
-        }
-    });
-    $('#next-photo').on('click', function() {
-        if (photoIndex < Number(data.photos.total) - 1) {
-            photoIndex++;
+    if (Number(data.photos.total) > 1) {
+        $('#prev-photo').on('click', function() {
+            if (photoIndex > 0) {
+                photoIndex--;
 
-            iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
-            iwcontent.find('#photo-num').text(photoIndex + 1);
-            if (photoIndex === 1) {
-                console.log('Enabling previous button...');
-                iwcontent.find('#prev-photo').removeAttr('disabled');
+                iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
+                iwcontent.find('#photo-num').text(photoIndex + 1);
+                if (photoIndex + 1 === Number(data.photos.total) - 1) {
+                    iwcontent.find('#next-photo').removeAttr('disabled');
+                }
+                if (photoIndex === 0) {
+                    iwcontent.find('#prev-photo').attr('disabled', true);
+                }
             }
-            if (photoIndex + 1 === Number(data.photos.total)) {
-                console.log('Disabling next button...');
-                iwcontent.find('#next-photo').attr('disabled', true);
+        });
+        $('#next-photo').on('click', function() {
+            if (photoIndex < Number(data.photos.total) - 1) {
+                photoIndex++;
+
+                iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
+                iwcontent.find('#photo-num').text(photoIndex + 1);
+                if (photoIndex === 1) {
+                    iwcontent.find('#prev-photo').removeAttr('disabled');
+                }
+                if (photoIndex + 1 === Number(data.photos.total)) {
+                    iwcontent.find('#next-photo').attr('disabled', true);
+                }
             }
-        }
-    });
-    console.log('iwcontent now:');
-    console.log(iwcontent[0]);
+        });
+    }
     infowindow.setContent(iwcontent[0]);
-    // infowindow.open(map, marker);
 
-    // Update photo div src to load first photo
-    // If more than 1 add prev/next buttons
     /* Notes:
     Example JSON Response:
     { "photos": { "page": 1, "pages": 1, "perpage": 100, "total": 50,
         "photo": [
           { "id": "11876531065", "owner": "88636811@N06", "secret": "b23b77d7a1", "server": "7390", "farm": 8, "title": "cold", "ispublic": 1, "isfriend": 0, "isfamily": 0 },
           (...),
-          { "id": "92265376", "owner": "39832458@N00", "secret": "3e07aa0323", "server": 13, "farm": 1, "title": "habitat5", "ispublic": 1, "isfriend": 0, "isfamily": 0 }
         ] },
      "stat": "ok" }
     */
