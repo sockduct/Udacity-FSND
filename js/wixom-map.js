@@ -27,6 +27,7 @@ function initMap() {
     // This will be a "highlighted location" marker color for when user mouses
     // over the marker
     var highlightedIcon = makeMarkerIcon('ffff24');
+    // var selectedIcon = makeMarkerIcon('3db73c');
 
     map = new google.maps.Map(mapDiv[0], {
         center: wixom,
@@ -54,7 +55,11 @@ function initMap() {
         marker.addListener('click', function() {
             // Clicked marker = this
             // populateInfoWindow is a function below
-            populateInfoWindow(this, largeInfoWindow);
+            resetMarkerIcons();
+            this.setAnimation(google.maps.Animation.DROP);
+            this.setIcon(highlightedIcon);
+            // populateInfoWindow(this, largeInfoWindow);
+            getPlacesDetails(this, largeInfoWindow);
         });
         // Two event listeners - one for mouseover, one for mouseout,
         // to change the colors back and forth.
@@ -83,63 +88,11 @@ function makeMarkerIcon(markerColor) {
     return markerImage;
 }
 
-// This function populates the infowindow when the marker is clicked. We'll only allow
-// one infowindow which will open at the marker that is clicked, and populate based
-// on that markers position.
-function populateInfoWindow(marker, infowindow) {
-    // Check to make sure the infowindow is not already opened on this marker.
-    if (infowindow.marker != marker) {
-        // Clear the infowindow content to give the streetview time to load.
-        infowindow.setContent('');
-        infowindow.marker = marker;
-        /* Removed when added street view functionality
-        infowindow.setContent('<div>' + marker.title + '</div>');
-        infowindow.open(map, marker);
-        */
-        // Make sure the marker property is cleared if the infowindow is closed.
-        infowindow.addListener('closeclick', function() {
-            infowindow.setMarker = null;
-        });
-
-        var streetViewService = new google.maps.StreetViewService();
-        // Street view data might not have exact match for Lat+Lng, so search within a radius:
-        var radius = 50;
-        // In case the status is OK, which means the pano was found, compute the
-        // position of the streetview image, then calculate the heading, then get a
-        // panorama from that and set the options
-        function getStreetView(data, status) {
-            if (status == google.maps.StreetViewStatus.OK) {
-                var nearStreetViewLocation = data.location.latLng;
-                // Compute heading (from which direction are you looking at street view)
-                // Use location of nearest street view and our marker for this
-                var heading = google.maps.geometry.spherical.computeHeading(
-                        nearStreetViewLocation, marker.position);
-                // Create div with id of pano to reference below
-                infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
-                var panoramaOptions = {
-                    position: nearStreetViewLocation,
-                    pov: {
-                        // As computed from above
-                        heading: heading,
-                        // Looking slightly up at building
-                        pitch: 30
-                    }
-                };
-                // Put street view panorama in div with pano id
-                var panorama = new google.maps.StreetViewPanorama(
-                        document.getElementById('pano'), panoramaOptions);
-            } else {
-                // If there's no street view data available:
-                infowindow.setContent('<div>' + marker.title + '</div>' +
-                    '<div>No Street View Found</div>');
-            }
-        }
-        // Use streetview service to get the closest streetview image within
-        // 50 meters of the markers position
-        streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
-        // Open the infowindow on the correct marker.
-        infowindow.open(map, marker);
-    }
+function resetMarkerIcons() {
+    markers.forEach(function (marker) {
+        var defaultIcon = makeMarkerIcon('0091ff');
+        marker.setIcon(defaultIcon);
+    });
 }
 
 // This is the PLACE DETAILS search - it's the most detailed so it's only
@@ -155,7 +108,11 @@ function getPlacesDetails(marker, infowindow) {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
             // Set the marker property on this infowindow so it isn't created again.
             infowindow.marker = marker;
-            var innerHTML = '<div><strong>' + marker.title + '</strong>';
+
+            // Instead of text string, use jQuery to create new div/DOM element
+            var iwcontent = $('<div></div>');
+            iwcontent.attr('id', 'outer-iwcontent');
+            iwcontent.append('<strong>' + marker.title + '</strong>');
             // For each potential information element from places details, need to check
             // if it's present - it may or may not be
             /* Use marker.title instead
@@ -164,40 +121,190 @@ function getPlacesDetails(marker, infowindow) {
             }
             */
             if (place.formatted_address) {
-                innerHTML += '<br>' + place.formatted_address;
+                iwcontent.append('<br>' + place.formatted_address);
             }
             if (place.formatted_phone_number) {
-                innerHTML += '<br>' + place.formatted_phone_number;
+                iwcontent.append('<br>' + place.formatted_phone_number);
             }
             if (place.opening_hours) {
-                innerHTML += '<br><br><strong>Hours:</strong><br>' +
+                iwcontent.append('<br><br><strong>Hours:</strong><br>' +
                     place.opening_hours.weekday_text[0] + '<br>' +
                     place.opening_hours.weekday_text[1] + '<br>' +
                     place.opening_hours.weekday_text[2] + '<br>' +
                     place.opening_hours.weekday_text[3] + '<br>' +
                     place.opening_hours.weekday_text[4] + '<br>' +
                     place.opening_hours.weekday_text[5] + '<br>' +
-                    place.opening_hours.weekday_text[6];
+                    place.opening_hours.weekday_text[6]);
             }
+            /* Use Flickr photos instead...
             if (place.photos) {
                 innerHTML += '<br><br><img src="' + place.photos[0].getUrl(
                     {maxHeight: 100, maxWidth: 200}) + '">';
             }
+            */
             // Add a photo place holder
-            innerHTML += '<br><br><img src="" alt="Checking for Flickr Photos..." id="flickr-photo">';
-            innerHTML += '</div>';
-            infowindow.setContent(innerHTML);
+            iwcontent.append('<br><br><img src="" id="flickr-photo" alt="Checking for Flickr Photos..."></img>');
+            infowindow.setContent(iwcontent[0]);
             infowindow.open(map, marker);
             // Make sure the marker property is cleared if the infowindow is closed.
             infowindow.addListener('closeclick', function() {
                 infowindow.marker = null;
             });
+
+            // Retrieve Flickr Photo
+            var photoQueryURL = 'https://api.flickr.com/services/rest/?' + $.param({
+                'method': 'flickr.photos.search',
+                'api_key': flickrAPIKey,
+                'text': marker.title,
+                // 'tags': title,
+                'format': 'json',
+                'nojsoncallback': '1'
+            });
+
+            // AJAX Query:
+            // Consider setting timeout - not sure what default timeout is
+            $.ajax(photoQueryURL)
+                .done(function(data) {
+                    var photoIndex = 0;
+                    console.log('Sucessful query.');
+                    console.log(data);
+
+                    // Check status code - both good and bad
+                    // Check for results - handle 0, 1, and multiple
+                    // If get 0 results, try requerying without last word
+                    // e.g., Wixom Habitat instead of Wixom Habitat Vista
+                    /*
+                    if (Number(data.photos.total) === 0 && marker.title.split(' ').length > 2) {
+                        console.log('In if check of getPhotos...');
+                        var newTitle = marker.title.slice(0, title.lastIndexOf(' '));
+                        getPhotos(newTitle, marker, infowindow, iwcontent);
+                    }
+                    */
+
+                    if (data.stat !== "ok") {
+                        data.photos.total = "-1";
+                    }
+
+                    // Update photo div appropriately
+                    switch (data.photos.total) {
+                        case '-1':
+                            console.log('Case -1...');
+                            iwcontent.find('#flickr-photo').attr('alt', 'Error retrieving Flickr Photo.')
+                            break;
+                        case '0':
+                            console.log('Case 0...');
+                            iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found - Trying again with more general search...');
+                            break;
+                        // Later on for case 1, just want photo and no buttons
+                        case '1':
+                            console.log('Case 1...');
+                        // Later on for case 2+, want photo and forward/back buttons
+                        default:
+                            console.log('Made it to default case - ' + data.photos.total + ' Flickr photos available.');
+                            var photoArray = data.photos.photo;
+                            iwcontent.find('#flickr-photo').attr({
+                                'alt': 'Flickr Photo',
+                                'src': 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg'
+                            });
+                            iwcontent.append('<br>Source:  Flickr Photo API');
+                            iwcontent.append('<br><button id="prev-photo" type="button">Previous</button> Flickr Photo <button id="next-photo" type="button">Next</button>');
+                    }
+                    $('#prev-photo').on('click', function() {
+                        if (photoIndex > 0) {
+                            photoIndex--;
+
+                            iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
+
+                            console.log('photoIndex now:  ' + photoIndex);
+                        } else {
+                            console.log('photoIndex already at beginning (' + photoIndex + ')');
+                        }
+                    });
+                    $('#next-photo').on('click', function() {
+                        if (photoIndex < Number(data.photos.total) - 1) {
+                            photoIndex++;
+
+                            iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
+
+                            console.log('photoIndex now:  ' + photoIndex);
+                        } else {
+                            console.log('photoIndex already at end (' + photoIndex + ')');
+                        }
+                    });
+                    console.log('iwcontent now:');
+                    console.log(iwcontent[0]);
+                    infowindow.setContent(iwcontent[0]);
+                    infowindow.open(map, marker);
+                })
+                .fail(function(errReq, errStat) {
+                    console.log('Query with status of ' + errStat);
+                    console.log(errReq);
+                    // Update photo div appropriately (Flickr unavailable...)
+                })
+                .always(function(data, status) {
+                    console.log('In always method of AJAX query, status of ' + status + ', data:');
+                    console.log(data);
+
+                    if (data.photos.total === '0') {
+                        // Retrieve Updated Flickr Photo
+                        var photoQueryURL = 'https://api.flickr.com/services/rest/?' + $.param({
+                            'method': 'flickr.photos.search',
+                            'api_key': flickrAPIKey,
+                            'text': marker.title.slice(0, marker.title.lastIndexOf(' ')),
+                            // 'tags': title,
+                            'format': 'json',
+                            'nojsoncallback': '1'
+                        });
+
+                        $.ajax(photoQueryURL)
+                            .done(function(data) {
+                                console.log('Sucessful query.');
+                                console.log(data);
+
+                                if (data.stat !== "ok") {
+                                    data.photos.total = "-1";
+                                }
+
+                                // Update photo div appropriately
+                                switch (data.photos.total) {
+                                    case '-1':
+                                        console.log('Case -1...');
+                                        iwcontent.find('#flickr-photo').attr('alt', 'Error retrieving Flickr Photo.')
+                                        break;
+                                    case '0':
+                                        console.log('Case 0...');
+                                        iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found - Trying again with more general search...');
+                                        break;
+                                    // Later on for case 1, just want photo and no buttons
+                                    case '1':
+                                        console.log('Case 1...');
+                                    // Later on for case 2+, want photo and forward/back buttons
+                                    default:
+                                        console.log('Made it to default case - ' + data.photos.total + ' Flickr photos available.');
+                                        var photoArray = data.photos.photo;
+                                        iwcontent.find('#flickr-photo').attr({
+                                            'alt': 'Flickr Photo',
+                                            'src': 'https://farm' + photoArray[0].farm + '.staticflickr.com/' + photoArray[0].server + '/' + photoArray[0].id + '_' + photoArray[0].secret + '_m.jpg'
+                                        });
+                                        iwcontent.append('<br>Source:  Flickr Photo API');
+                                }
+                                console.log('iwcontent now:');
+                                console.log(iwcontent[0]);
+                                infowindow.setContent(iwcontent[0]);
+                                infowindow.open(map, marker);
+                            })
+                            .fail(function(err) {
+                                console.log('Failed query from .always');
+                                console.log(err);
+                            });
+                    }
+                });
         }
     });
 }
 
 // Query Flickr for place phots
-function getPhotos(title) {
+function getPhotos(title, marker, infowindow, iwcontent) {
     // Photo Search API Endpoint:
     // https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=<key>&text=<title>&format=json&nojsoncallback=1
     // var encodedTitle = encodeURI(title);
@@ -220,6 +327,7 @@ function getPhotos(title) {
             var flickrPhoto = $('#flickr-photo');
             console.log('Sucessful query.');
             console.log(data);
+
             // Check status code - both good and bad
             // Check for results - handle 0, 1, and multiple
             // If get 0 results, try requerying without last word
@@ -227,18 +335,25 @@ function getPhotos(title) {
             if (Number(data.photos.total) === 0 && title.split(' ').length > 2) {
                 console.log('In if check of getPhotos...');
                 var newTitle = title.slice(0, title.lastIndexOf(' '));
-                getPhotos(newTitle);
+                getPhotos(newTitle, marker, infowindow, iwcontent);
             }
+
+            if (data.stat !== "ok") {
+                data.photos.total = "-1";
+            }
+
             // Update photo div appropriately
             switch (Number(data.photos.total)) {
+                case -1:
+                    iwcontent.find('#flickr-photo').attr('alt', 'Error retrieving Flickr Photo.')
                 case 0:
-                    flickrPhoto.attr('alt', 'No Flickr Photos found.  :-(');
+                    iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found.  :-(');
                     break;
                 case 1:
                     var photoArray = data.photos.photo;
-                    flickrPhoto.attr({
-                        alt: 'Flickr Photo',
-                        src: 'https://farm' + photoArray[0].farm + '.staticflickr.com/' + photoArray[0].server + '/' + photoArray[0].id + '_' + photoArray[0].secret + '_m.jpg'
+                    iwcontent.find('#flickr-photo').attr({
+                        'alt': 'Flickr Photo',
+                        'src': 'https://farm' + photoArray[0].farm + '.staticflickr.com/' + photoArray[0].server + '/' + photoArray[0].id + '_' + photoArray[0].secret + '_m.jpg'
                     });
                     // Fall through to add next/prev buttons
                     // break;
@@ -246,10 +361,15 @@ function getPhotos(title) {
                 default:
                     console.log('Made it to default case - ' + data.photos.total + ' Flickr photos available.');
             }
+            console.log('iwcontent now:');
+            console.log(iwcontent);
+            infowindow.setContent(iwcontent[0]);
         })
         .fail(function(err) {
             console.log('Failed query.');
             console.log(err);
+
+            return err;
             // Update photo div appropriately (Flickr unavailable...)
         });
 
