@@ -71,7 +71,7 @@ function initMap() {
 
 function initMapError() {
     var mapDiv = $('#map');
-    mapDiv.append('<h2><em>Unable to load map from Google Maps API </em> :-(</h2>');
+    mapDiv.append('<h2><em>Unable to load map from Google Maps API... </em> :-(</h2>');
 }
 
 // This function takes in a COLOR, and then creates a new marker
@@ -176,35 +176,45 @@ function getPhotos(title, iwcontent, infowindow) {
     // AJAX Query:
     // Consider setting timeout - not sure what default timeout is
     $.ajax(photoQueryURL)
-        .done(function(data) {
-            // Check status code - both good and bad
-            // Check for results - handle 0, 1, and multiple
-            // If get 0 results, try requerying without last word
-            // e.g., Wixom Habitat instead of Wixom Habitat Vista
+        .done(function(respData, reqStat, reqObj) {
             /*
-            if (Number(data.photos.total) === 0 && marker.title.split(' ').length > 2) {
-                console.log('In if check of getPhotos...');
-                var newTitle = marker.title.slice(0, title.lastIndexOf(' '));
-                getPhotos(newTitle, marker, infowindow, iwcontent);
-            }
+            console.log('Query finished with status "' + reqStat + '".');
+            console.log('respData:');
+            console.log(respData);
             */
-
-            if (data.stat !== "ok") {
-                data.photos.total = "-1";
-            }
+            // Check Flickr API Call Status
+            respData.stat === 'ok' ? respData.error = false : respData.error = true;
         })
-        .fail(function(errReq, errStat) {
-            console.log('Query with status of ' + errStat);
-            console.log(errReq);
+        .fail(function(reqObj, reqStat, errThrown) {
+            console.log('Query failed with status "' + reqStat + '".');
+            if (errThrown) {
+                console.log('Error thrown:  "' + errThrown + '".');
+            }
+            /*
+            console.log('reqObj:');
+            console.log(reqObj);
+            */
             // Update photo div appropriately (Flickr unavailable...)
         })
-        .always(function(data) {
-            // Error handling - if data missing this, then add it:
-            // var data = {'photos': {'total': "-1"}};
+        .always(function(reqRespObj, reqStat) {
+            /*
+            console.log('Query completed with status "' + reqStat + '".');
+            console.log('reqRespObj:');
+            console.log(reqRespObj);
+            */
+            if (reqStat === 'success') {
+                var photoData = reqRespObj;
+            } else {
+                // Create empty data set:
+                var photoData = {
+                    photos: {total: '0'},
+                    error: true
+                };
+            }
 
-            installPhotos(data, iwcontent, infowindow);
+            installPhotos(photoData, iwcontent, infowindow);
 
-            if (data.photos.total === '0' && title.split(' ').length > 2) {
+            if (photoData.photos.total === '0' && title.split(' ').length > 2) {
                 var newTitle = title.slice(0, title.lastIndexOf(' '));
                 // Retry with more general title search
                 getPhotos(newTitle, iwcontent, infowindow);
@@ -212,44 +222,45 @@ function getPhotos(title, iwcontent, infowindow) {
         });
 }
 
-function installPhotos(data, iwcontent, infowindow) {
+function installPhotos(photoData, iwcontent, infowindow) {
     // Update photo div appropriately
     var photoIndex = 0;
 
-    switch (data.photos.total) {
-        case '-1':
-            console.log('Case -1...');
-            iwcontent.find('#flickr-photo').attr('alt', 'Error retrieving Flickr Photo.')
-            break;
-        case '0':
-            console.log('Case 0...');
-            iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found...');
-            break;
-        default:
-            // Photo Retrieval:
-            // m = 240px max, n = 320px max
-            // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_m.jpg'
-            // Could use template literals, but no IE support...
-            var photoArray = data.photos.photo;
-            iwcontent.find('#flickr-photo').attr({
-                'alt': 'Flickr Photo',
-                'src': 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg'
-            });
-            iwcontent.append('<br>Source:  Flickr Photo API');
+    if (photoData.error) {
+        console.log('installPhotos:  passed photo data set encountered errors...');
+        iwcontent.find('#flickr-photo').attr('alt', 'Failed to retrieve Flickr Photos.')
+    } else {
+        switch (photoData.photos.total) {
+            case '0':
+                console.log('Case 0...');
+                iwcontent.find('#flickr-photo').attr('alt', 'No Flickr Photos found...');
+                break;
+            default:
+                // Photo Retrieval:
+                // m = 240px max, n = 320px max
+                // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_m.jpg'
+                // Could use template literals, but no IE support...
+                var photoArray = photoData.photos.photo;
+                iwcontent.find('#flickr-photo').attr({
+                    'alt': 'Flickr Photo',
+                    'src': 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg'
+                });
+                iwcontent.append('<br>Source:  Flickr Photo API');
 
-            if (Number(data.photos.total) > 1) {
-                iwcontent.append('<br><br><button id="prev-photo" type="button" disabled>Previous</button> Flickr Photo <span id="photo-num">' + (photoIndex + 1) + '</span> of ' + data.photos.total + ' <button id="next-photo" type="button">Next</button>');
-            }
+                if (Number(photoData.photos.total) > 1) {
+                    iwcontent.append('<br><br><button id="prev-photo" type="button" disabled>Previous</button> Flickr Photo <span id="photo-num">' + (photoIndex + 1) + '</span> of ' + photoData.photos.total + ' <button id="next-photo" type="button">Next</button>');
+                }
+        }
     }
 
-    if (Number(data.photos.total) > 1) {
+    if (Number(photoData.photos.total) > 1) {
         $('#prev-photo').on('click', function() {
             if (photoIndex > 0) {
                 photoIndex--;
 
                 iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
                 iwcontent.find('#photo-num').text(photoIndex + 1);
-                if (photoIndex + 1 === Number(data.photos.total) - 1) {
+                if (photoIndex + 1 === Number(photoData.photos.total) - 1) {
                     iwcontent.find('#next-photo').removeAttr('disabled');
                 }
                 if (photoIndex === 0) {
@@ -258,7 +269,7 @@ function installPhotos(data, iwcontent, infowindow) {
             }
         });
         $('#next-photo').on('click', function() {
-            if (photoIndex < Number(data.photos.total) - 1) {
+            if (photoIndex < Number(photoData.photos.total) - 1) {
                 photoIndex++;
 
                 iwcontent.find('#flickr-photo').attr('src', 'https://farm' + photoArray[photoIndex].farm + '.staticflickr.com/' + photoArray[photoIndex].server + '/' + photoArray[photoIndex].id + '_' + photoArray[photoIndex].secret + '_m.jpg');
@@ -266,7 +277,7 @@ function installPhotos(data, iwcontent, infowindow) {
                 if (photoIndex === 1) {
                     iwcontent.find('#prev-photo').removeAttr('disabled');
                 }
-                if (photoIndex + 1 === Number(data.photos.total)) {
+                if (photoIndex + 1 === Number(photoData.photos.total)) {
                     iwcontent.find('#next-photo').attr('disabled', true);
                 }
             }

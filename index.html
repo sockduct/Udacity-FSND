@@ -21,7 +21,7 @@
     <script defer src="js/menu.js"></script>
     <script defer src="js/keys.js"></script>
     <!-- Note:  Loading places library - used in wixom-app.js
-                Load after wixom-app.js since it's using callback defined there -->
+                Load after wixom-app.js since it's using callbacks defined there -->
     <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=initMap&libraries=places" onerror="initMapError()"></script>
   </head>
   <body>
@@ -47,7 +47,8 @@
             <li><a href="#" data-bind="click: $parent.updateCurrentPoi, text: title"></a></li>
           </ul>
         </div>
-        <!-- div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <!-- Nope!  Google Maps doesn't like being boxed in here...
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         </div -->
       </div>
     </div>
