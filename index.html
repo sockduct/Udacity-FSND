@@ -25,35 +25,37 @@
     <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=initMap&libraries=places" onerror="initMapError()"></script>
   </head>
   <body>
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-          <!-- Sidebar header -->
-          <ul class="nav nav-sidebar">
-            <li><a href="">Wixom, Michigan, USA</a></li>
-            <li class="active"><a href="">Points of Interest</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <form class="form-inline">
-              <div class="form-group">
-                <label class="sr-only" for="inputFilter">Filter Text</label>
-                <input type="text" id="filter-text" class="form-control" placeholder="Filter, e.g., Vista">
-              </div>
-              <button type="submit" id="filter-button" class="btn btn-success">Filter</button>
-            </form>
-          </ul>
-          <ul class="nav nav-sidebar" data-bind="foreach: poiList">
-            <!-- li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li -->
-            <li><a href="#" data-bind="click: $parent.updateCurrentPoi, text: title"></a></li>
-          </ul>
-        </div>
-        <!-- Nope!  Google Maps doesn't like being boxed in here...
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        </div -->
-      </div>
+    <div class="container-fluid">
+      <nav class="sidebar">
+        <!-- Sidebar header -->
+        <ul class="nav nav-sidebar">
+          <li><a href="">Wixom, Michigan, USA</a></li>
+          <li class="active" id="sidebarCollapse"><a href="">Points of Interest &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-menu-hamburger"></i></a></li>
+          <!-- Button to toggle sidebar open/closed -->
+          <!--button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
+            <i class="glyphicon glyphicon-menu-hamburger"></i>
+            Toggle
+          </button-->
+        </ul>
+        <ul class="nav nav-sidebar">
+          <form class="form-inline">
+            <div class="form-group">
+              <label class="sr-only" for="inputFilter">Filter Text</label>
+              <input type="text" id="filter-text" class="form-control" placeholder="Filter, e.g., Vista">
+            </div>
+            <button type="submit" id="filter-button" class="btn btn-success">Filter</button>
+          </form>
+        </ul>
+        <ul class="nav nav-sidebar" data-bind="foreach: poiList">
+          <!-- li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li -->
+          <li><a href="#" data-bind="click: $parent.updateCurrentPoi, text: title"></a></li>
+        </ul>
+      </nav>
+
+      <main>
+        <!-- A div with the id of "map" is used by Google Maps -->
+        <div id="map"></div>
+      </main>
     </div>
-    <!-- A div with the id of "map" is used by Google Maps -->
-    <!-- Appears it doesn't like being within a container if height is 100%... -->
-    <div id="map"></div>
   </body>
 </html>

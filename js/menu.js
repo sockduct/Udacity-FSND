@@ -29,6 +29,15 @@ var pointOfInterest = function(poiData) {
 
 var filterRecall = '';
 
+// Collapsable sidebar
+$('#sidebarCollapse').on('click', function(event) {
+    // Prevent following hyperlink
+    event.preventDefault();
+    $('.sidebar').toggleClass('active');
+    $('#map').toggleClass('active');
+    $('#filter-button').toggleClass('hidden');
+});
+
 var viewModel = function() {
     var self = this;  // Store a reference to the viewModel object
     this.filterText = $('#filter-text');
