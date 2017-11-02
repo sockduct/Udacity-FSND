@@ -1,9 +1,9 @@
 # Neighborhood Map Project
 ## Project 5
 
-### Project Purpose and Notes
+### Project Overview
 This project leverages the [Knockout Framework](http://knockoutjs.com/), the [Google Maps API](https://developers.google.com/maps/), and the [Flickr API](https://www.flickr.com/services/api/) to create a mashup showcasing interesting places within small area such as a city.  Knockout manages the selection menu bar allowing the user to pick any one of the points of interest and showing relevant information on the map of the area.  The Google Maps JavaScript library manages the map and everything on it, with available photos from Flickr added to popup windows if available.
-Notes:
+##### Notes:
 * The web application uses [Bootstrap v3.x](https://getbootstrap.com/docs/3.3/) and is based on the dashboard example template.
 * [This article on Bootstrap Sidebars](https://bootstrapious.com/p/bootstrap-sidebar) was used as a reference to help make the menu bar collapsable and starting open/collapsed depending on the screen size.
 
@@ -11,7 +11,7 @@ Notes:
 * Clone [my project 5 GitHub repo](https://github.com/sockduct/FSND-Project-5)
 * Obtain a [Flickr API Key](https://www.flickr.com/services/api/misc.api_keys.html)
 * Create the file js/keys.js with your Flickr API Key in the following format:
-  * var flickrAPIKey = '<your-key>';
+  * `var flickrAPIKey = '<your-key>';`
 * Open the index.html file
 
 ### Project Requirements
