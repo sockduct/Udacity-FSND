@@ -4,7 +4,8 @@
     * Menu (Nav Sidebar) functionality implemented by Knockout
 */
 
-'use strict';
+// Disabling to pass JSHint warnings
+// 'use strict';
 
 // Hold representation of Google Map and InfoWindow
 var map, largeInfoWindow;
@@ -39,6 +40,7 @@ var pointsOfInterest = [
 
 // Callback to initialize Google Map
 function initMap() {
+    'use strict';
     // Constructor creates a new map - only center and zoom are required
     // Need to specify where to load map (using #map here)
     // Need to also specify coordinates - center & zoom values (0-22)
@@ -99,6 +101,7 @@ function initMap() {
 
 // Callback if we can't reach Google Maps API or experience some kind of failure
 function initMapError() {
+    'use strict';
     var mapDiv = $('#map');
     mapDiv.append('<h2><em>Unable to load map from Google Maps API... </em> :-(</h2>');
 }
@@ -108,6 +111,7 @@ function initMapError() {
 // icon of that color. The icon will be 21 px wide by 34 high, have an origin
 // of 0, 0 and be anchored at 10, 34).
 function makeMarkerIcon(markerColor) {
+    'use strict';
     var markerImage = new google.maps.MarkerImage(
         'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
             '|40|_|%E2%80%A2',
@@ -122,6 +126,7 @@ function makeMarkerIcon(markerColor) {
 
 // Reset all Google Map markers to the default color
 function resetMarkerIcons() {
+    'use strict';
     markers.forEach(function (marker) {
         var defaultIcon = makeMarkerIcon('0091ff');
         marker.setIcon(defaultIcon);
@@ -135,6 +140,7 @@ function resetMarkerIcons() {
 // Note: It uses placeid to get place details and display in an infowindow above
 // user cliked place marker
 function getPlacesDetails(marker, infowindow) {
+    'use strict';
     var service = new google.maps.places.PlacesService(map);
     service.getDetails({
         placeId: marker.id
@@ -176,7 +182,7 @@ function getPlacesDetails(marker, infowindow) {
             }
             */
         } else {
-            iwcontent.append('<br><br><em>Unable to load data from Google Maps, Places API</em>')
+            iwcontent.append('<br><br><em>Unable to load data from Google Maps, Places API</em>');
         }
 
         // Add a photo place holder
@@ -194,6 +200,7 @@ function getPlacesDetails(marker, infowindow) {
 
 // Query Flickr for place photos and retrieve if available (using AJAX)
 function getPhotos(title, iwcontent, infowindow) {
+    'use strict';
     // Photo Search API Endpoint:
     // https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=<key>&text=<title>&format=json&nojsoncallback=1
     var photoQueryURL = 'https://api.flickr.com/services/rest/?' + $.param({
@@ -234,11 +241,13 @@ function getPhotos(title, iwcontent, infowindow) {
             console.log('reqRespObj:');
             console.log(reqRespObj);
             */
+            var photoData;
+
             if (reqStat === 'success') {
-                var photoData = reqRespObj;
+                photoData = reqRespObj;
             } else {
                 // Create empty data set:
-                var photoData = {
+                photoData = {
                     photos: {total: '0'},
                     error: true
                 };
@@ -256,12 +265,13 @@ function getPhotos(title, iwcontent, infowindow) {
 
 // Update marker infowindow with retrieved Flicrk photo(s)
 function installPhotos(photoData, iwcontent, infowindow) {
+    'use strict';
     // Update photo div appropriately
     var photoIndex = 0;
 
     if (photoData.error) {
         console.log('installPhotos:  passed photo data set encountered errors...');
-        iwcontent.find('#flickr-photo').attr('alt', 'Failed to retrieve Flickr Photos.')
+        iwcontent.find('#flickr-photo').attr('alt', 'Failed to retrieve Flickr Photos.');
     } else {
         switch (photoData.photos.total) {
             case '0':
@@ -345,6 +355,7 @@ $('#sidebarCollapse').on('click', function(event) {
 
 // Knockout ViewModel functionality
 var viewModel = function() {
+    'use strict';
     var self = this;  // Store a reference to the viewModel object
     this.filterText = $('#filter-text');
     this.filterBtn = $('#filter-button');
