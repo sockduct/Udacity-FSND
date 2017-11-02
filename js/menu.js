@@ -38,6 +38,7 @@ $('#sidebarCollapse').on('click', function(event) {
     $('#filter-button').toggleClass('hidden');
 });
 
+// Knockout ViewModel functionality
 var viewModel = function() {
     var self = this;  // Store a reference to the viewModel object
     this.filterText = $('#filter-text');
