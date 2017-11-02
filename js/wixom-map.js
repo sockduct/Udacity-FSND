@@ -1,5 +1,7 @@
 /*
-    Google Maps Code
+    Web Application Code
+    * Google Maps API functionality implement by the Google Maps JavaScript Library
+    * Menu (Nav Sidebar) functionality implemented by Knockout
 */
 
 'use strict';
@@ -7,9 +9,35 @@
 // Hold representation of Google Map and InfoWindow
 var map, largeInfoWindow;
 
-// Array to hold marker locations:
+// Array to hold Google Map marker locations:
 var markers = [];
 
+// Object for knockout to store info about a point of interest from the map (marker)
+var pointOfInterest = function(poiData) {
+    this.title = ko.observable(poiData.title);
+    this.location = ko.observable(poiData.location);
+};
+
+// Keep track of menu list filter to allow toggling it on and off
+var filterRecall = '';
+
+// Array of Points of Interest for Google Map markers
+var pointsOfInterest = [
+    {title: "Alex's Pizzeria", location: {lat: 42.524625, lng: -83.532651},
+        place: 'Eis0OTAwMCBXIFBvbnRpYWMgVHJhaWwsIFdpeG9tLCBNSSA0ODM5MywgVVNB'},
+    {title: 'Detroit Public Television', location: {lat: 42.500581, lng: -83.553301},
+        place: 'ChIJz3mlFlmoJIgRiVZL_fZXx50'},
+    {title: 'Puckmasters', location: {lat: 42.520194, lng: -83.552822},
+        place: 'ChIJw3d8SXyoJIgRI2gTN-ShU40'},
+    {title: 'Wixom City Hall Fountain', location: {lat: 42.524013, lng: -83.532183},
+        place: 'ChIJD7BLEJ6oJIgRb-8oaW1ao3c'},
+    {title: 'Wixom Fire Department', location: {lat: 42.540713, lng: -83.537809},
+        place: 'ChIJ_as08TmmJIgRyNMPA08nWI8'},
+    {title: 'Wixom Habitat Vista', location: {lat: 42.538552, lng: -83.541523},
+        place: 'ChIJI3oMRDqmJIgRClQR9PGkk08'}
+];
+
+// Callback to initialize Google Map
 function initMap() {
     // Constructor creates a new map - only center and zoom are required
     // Need to specify where to load map (using #map here)
@@ -69,11 +97,13 @@ function initMap() {
     }
 }
 
+// Callback if we can't reach Google Maps API or experience some kind of failure
 function initMapError() {
     var mapDiv = $('#map');
     mapDiv.append('<h2><em>Unable to load map from Google Maps API... </em> :-(</h2>');
 }
 
+// Google Maps API Marker Customization function
 // This function takes in a COLOR, and then creates a new marker
 // icon of that color. The icon will be 21 px wide by 34 high, have an origin
 // of 0, 0 and be anchored at 10, 34).
@@ -90,6 +120,7 @@ function makeMarkerIcon(markerColor) {
     return markerImage;
 }
 
+// Reset all Google Map markers to the default color
 function resetMarkerIcons() {
     markers.forEach(function (marker) {
         var defaultIcon = makeMarkerIcon('0091ff');
@@ -97,6 +128,7 @@ function resetMarkerIcons() {
     });
 }
 
+// Google Maps API Place function leveraging the places library
 // This is the PLACE DETAILS search - it's the most detailed so it's only
 // executed when a marker is selected, indicating the user wants more
 // details about that place.
@@ -160,7 +192,7 @@ function getPlacesDetails(marker, infowindow) {
     });
 }
 
-// Query Flickr for place photos
+// Query Flickr for place photos and retrieve if available (using AJAX)
 function getPhotos(title, iwcontent, infowindow) {
     // Photo Search API Endpoint:
     // https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=<key>&text=<title>&format=json&nojsoncallback=1
@@ -222,6 +254,7 @@ function getPhotos(title, iwcontent, infowindow) {
         });
 }
 
+// Update marker infowindow with retrieved Flicrk photo(s)
 function installPhotos(photoData, iwcontent, infowindow) {
     // Update photo div appropriately
     var photoIndex = 0;
@@ -295,3 +328,95 @@ function installPhotos(photoData, iwcontent, infowindow) {
      "stat": "ok" }
     */
 }
+
+// Function to implement collapsable sidebar
+$('#sidebarCollapse').on('click', function(event) {
+    // Prevent following hyperlink
+    event.preventDefault();
+    $('.sidebar').toggleClass('active');
+    $('#map').toggleClass('active');
+    $('#filter-button').toggleClass('hidden');
+});
+
+
+/*
+    Knockout Code - Map Menu/Points of Interest List
+ */
+
+// Knockout ViewModel functionality
+var viewModel = function() {
+    var self = this;  // Store a reference to the viewModel object
+    this.filterText = $('#filter-text');
+    this.filterBtn = $('#filter-button');
+    this.poiList = ko.observableArray([]);
+    this.currentPoi = ko.observable();  // Start out with no POI set
+
+    this.populatePoiList = function(filterString) {
+        var re1 = new RegExp(filterString, 'i');
+
+        // Purge any existing elements
+        if (self.poiList().length) {
+            self.poiList.splice(0, self.poiList().length);
+        }
+        // Hide all map markers
+        for (var i = 0; i < markers.length; i++) {
+            markers[i].setMap(null);
+        }
+
+        // pointsOfInterest.forEach(function(poi) {  // use for loop so have index
+        for (var i = 0; i < pointsOfInterest.length; i++) {
+            // If no filter or matching filter, add element
+            if (!filterString || (filterString && pointsOfInterest[i].title.match(re1))) {
+                self.poiList.push(new pointOfInterest(pointsOfInterest[i]));
+                // Display relevant marker on map if initialized
+                if (markers[i]) {
+                    markers[i].setMap(map);
+                }
+            }
+        }
+    };
+    this.populatePoiList();
+
+    this.updateCurrentPoi = function(clickedPoi) {
+        var highlightedIcon = makeMarkerIcon('ffff24');
+        self.currentPoi(clickedPoi);
+        console.log('You clicked on:  ' + clickedPoi.title());
+
+        for (var i = 0; i < pointsOfInterest.length; i++) {
+            if (pointsOfInterest[i].title === clickedPoi.title()) {
+                resetMarkerIcons();
+                markers[i].setAnimation(google.maps.Animation.DROP);
+                markers[i].setIcon(highlightedIcon);
+                getPlacesDetails(markers[i], largeInfoWindow);
+                break;
+            }
+        }
+    };
+
+    this.filterBtn.on('click', function(event) {
+        // Prevent page refresh
+        event.preventDefault();
+        var filterTextVal = self.filterText.val();
+
+        // Filter applied - set button color to orange
+        if (filterTextVal && filterTextVal !== filterRecall) {
+            self.filterBtn.removeClass();
+            self.filterBtn.addClass('btn btn-warning');
+        // Filter cleared - set button color to green
+        } else {
+            // Click on filter button without chaning text --> clear filter
+            if (filterTextVal === filterRecall) {
+                // Clear filter
+                filterTextVal = '';
+            }
+            self.filterBtn.removeClass();
+            self.filterBtn.addClass('btn btn-success');
+        }
+
+        self.populatePoiList(filterTextVal);
+        // Do last - remember applied filter:
+        filterRecall = filterTextVal;
+    });
+};
+
+ko.applyBindings(new viewModel());
