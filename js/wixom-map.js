@@ -64,10 +64,12 @@ function initMap() {
         zoom: 13
     });
 
-    for (var i = 0; i < pointsOfInterest.length; i++) {
+    // Change just to eliminate JSHint Warning
+    // for (var i = 0; i < pointsOfInterest.length; i++) {
+    pointsOfInterest.forEach(function (poi) {
         // Get the position from the location array.
-        var position = pointsOfInterest[i].location;
-        var title = pointsOfInterest[i].title;
+        var position = poi.location;
+        var title = poi.title;
         // Create a marker per location, and put into markers array.
         var marker = new google.maps.Marker({
             map: map,
@@ -75,7 +77,7 @@ function initMap() {
             title: title,
             animation: google.maps.Animation.DROP,
             icon: defaultIcon,
-            id: pointsOfInterest[i].place
+            id: poi.place
         });
 
         // Push the marker to our array of markers.
@@ -96,7 +98,7 @@ function initMap() {
         marker.addListener('mouseout', function() {
             this.setIcon(defaultIcon);
         });
-    }
+    });
 }
 
 // Callback if we can't reach Google Maps API or experience some kind of failure
@@ -375,13 +377,14 @@ var viewModel = function() {
         }
 
         // pointsOfInterest.forEach(function(poi) {  // use for loop so have index
-        for (var i = 0; i < pointsOfInterest.length; i++) {
+        // Change i to j, solely to eliminate debatable JSHint Warning
+        for (var j = 0; j < pointsOfInterest.length; j++) {
             // If no filter or matching filter, add element
-            if (!filterString || (filterString && pointsOfInterest[i].title.match(re1))) {
-                self.poiList.push(new pointOfInterest(pointsOfInterest[i]));
+            if (!filterString || (filterString && pointsOfInterest[j].title.match(re1))) {
+                self.poiList.push(new pointOfInterest(pointsOfInterest[j]));
                 // Display relevant marker on map if initialized
-                if (markers[i]) {
-                    markers[i].setMap(map);
+                if (markers[j]) {
+                    markers[j].setMap(map);
                 }
             }
         }
