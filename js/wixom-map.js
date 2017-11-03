@@ -7,6 +7,9 @@
 // Disabling to pass JSHint warnings
 // 'use strict';
 
+// Put Flickr API Key Here:
+var flickrAPIKey = '<key>';
+
 // Hold representation of Google Map and InfoWindow
 var map, largeInfoWindow;
 
