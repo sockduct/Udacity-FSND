@@ -1,0 +1,20 @@
+[
+    {"title": "Alex's Pizzeria",
+        "location": {"lat": 42.524625, "lng": -83.532651},
+        "place": "ChIJsXPu5p2oJIgRiYFqju2_pac"},
+    {"title": "Detroit Public Television",
+        "location": {"lat": 42.500581, "lng": -83.553301},
+        "place": "ChIJCX4CbFmoJIgRt5_olD-mees"},
+    {"title": "Puckmasters",
+        "location": {"lat": 42.520194, "lng": -83.552822},
+        "place": "ChIJw3d8SXyoJIgRI2gTN-ShU40"},
+    {"title": "Wixom City Hall Fountain",
+        "location": {"lat": 42.524013, "lng": -83.532183},
+        "place": "ChIJb24v4Z2oJIgRJ4UBmKTh_mo"},
+    {"title": "Wixom Fire Department",
+        "location": {"lat": 42.540713, "lng": -83.537809},
+        "place": "ChIJ_as08TmmJIgRyNMPA08nWI8"},
+    {"title": "Wixom Habitat Vista",
+        "location": {"lat": 42.538552, "lng": -83.541523},
+        "place": "ChIJI3oMRDqmJIgRClQR9PGkk08"}
+]

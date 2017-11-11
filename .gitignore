@@ -1,1 +1,5 @@
+.eslintrc.js
 js/keys.js
+tmp*/*
+wixom-map.jshint.txt
+
