@@ -165,7 +165,6 @@ var google = google || {};  // Google top level (google.maps.*)
     app.ViewModel = function() {
         var self = this;  // Store a reference to the app.ViewModel object
         this.filterText = ko.observable('');
-        this.filterBtn = $('#filter-button');
         // Hide Side Navbar Elements unless screen width at least 768 pixels
         this.showNavElmts = ko.observable(false);
         this.poiList = ko.observableArray([]);

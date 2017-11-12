@@ -12,6 +12,11 @@ This project leverages the [Knockout Framework](http://knockoutjs.com/), the [Go
 * Obtain a [Flickr API Key](https://www.flickr.com/services/api/misc.api_keys.html)
 * Create the file js/keys.js with your Flickr API Key in the following format:
   * `var flickrAPIKey = '<your-key>';`
+* Run a local web server to server the host index.html, places.json (points of interest data file), the CSS, Fonts, Img, and JS directories:
+  * Python 2.x:  `python -m SimpleHTTPServer`
+  * Python 3.x:  `python -m http.server`
+  * Note: The default port is 8000, and can be changed by adding a port at the end:
+    *  `python -m <http-server-library> 8080`
 * Open the index.html file
 
 ### Project Requirements
