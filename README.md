@@ -44,8 +44,8 @@ This project leverages the [Knockout Framework](http://knockoutjs.com/), the [Go
 * knockout-3.4.2.js - Knockout Framework code
 
 ### Example Project Output
-
 * Web Interface (e.g., using Chrome):
+
   ![Cropped View of Starting Page](img/Web_App_ScreenShot.png)
 
 ### License
