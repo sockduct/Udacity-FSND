@@ -13,15 +13,14 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="css/dashboard.css" rel="stylesheet" type="text/css">
     <!-- Use defer option so scripts load aysnchronously and execute after DOM fully loaded -->
-    <script defer src="js/jquery-3.2.1.min.js"></script>
+    <!--script defer src="js/jquery-3.2.1.min.js"></script>
     <script defer src="js/bootstrap.min.js"></script>
     <script defer src="js/knockout-3.4.2.js"></script>
     <script defer src="js/wixom-map.js"></script>
-    <!-- Per Udacity request, must provide API key upon submission -->
-    <script defer src="js/keys.js"></script>
+    <script defer src="js/keys.js"></script-->
     <!-- Note:  Loading places library - used in wixom-app.js
                 Load after wixom-app.js since it's using callbacks defined there -->
-    <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=app.initMap&libraries=places" onerror="app.initMapError()"></script>
+    <!--script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=app.initMap&libraries=places" onerror="app.initMapError()"></script-->
   </head>
   <body>
     <div class="container-fluid">
@@ -78,8 +77,18 @@
       <div data-bind="visible: $data.showCredit">Source:  Flickr Photo API</div>
       <!-- If more than one Flickr Photo add Next/Prev buttons -->
       <div data-bind="visible: $data.showPhotoCtl">
-        <br><button type="button" data-bind="click: $root.flickrPrevPhoto, disable: $data.photoIndex() === 0">Previous</button> Flickr Photo <span data-bind="text: $data.photoIndex() + 1"></span> of <span data-bind="text: $data.photoTotal"></span> <button type="button" data-bind="click: $root.flickrNextPhoto, disable: $data.photoIndex() + 1 === Number($data.photoTotal())">Next</button>
+        <br><button type="button" data-bind="click: $root.flickrPrevPhoto, disable: $data.photoIndex() === 0">Prev</button> Flickr Photo <span data-bind="text: $data.photoIndex() + 1"></span> of <span data-bind="text: $data.photoTotal"></span> <button type="button" data-bind="click: $root.flickrNextPhoto, disable: $data.photoIndex() + 1 === Number($data.photoTotal())">Next</button>
       </div>
     </script>
+
+    <!-- Load scripts here per Udacity Request -->
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/knockout-3.4.2.js"></script>
+    <script src="js/wixom-map.js"></script>
+    <script src="js/keys.js"></script>
+    <!-- Note:  Loading places library - used in wixom-app.js
+                Load after wixom-app.js since it's using callbacks defined there -->
+    <script aysnc src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=app.initMap&libraries=places" onerror="app.initMapError()"></script>
   </body>
 </html>

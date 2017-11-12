@@ -3,6 +3,7 @@
     * Google Maps API functionality implement by the Google Maps JavaScript Library
     * Menu (Nav Sidebar) functionality implemented by Knockout
 */
+/* jshint esversion: 6 */
 
 // Application namespace:
 var app = app || {};
@@ -67,7 +68,7 @@ var google = google || {};  // Google top level (google.maps.*)
         var wixom = {lat: 42.524970, lng: -83.536211};  // Use zoom of 13
         // Match max width of Flickr Photo
         appiw.infowindow = new google.maps.InfoWindow({
-            maxWidth: 240
+            maxWidth: 250
         });
 
         app.map = new google.maps.Map(mapDiv[0], {
@@ -206,31 +207,18 @@ var google = google || {};  // Google top level (google.maps.*)
             self.currentPoi(clickedPoi);
             // console.log('You clicked on:  ' + clickedPoi.title());
 
-            for (var i = 0; i < app.pointsOfInterest.length; i++) {
+            for (let i = 0; i < app.pointsOfInterest.length; i++) {
                 if (app.pointsOfInterest[i].title === clickedPoi.title()) {
                     // For small screens, toggle the list menu closed so infowindow
                     // isn't too narrow
                     if ($(window).width() < 768 && $('.sidebar').hasClass('active')) {
                         $('#sidebarCollapse').trigger('click');
                     }
-
                     resetMarkerIcons();
                     // Center map to selected marker:
                     app.map.panTo(markers[i].getPosition());
-                    // app.map.panToBounds();
-                    // Now Pan down so InfoWindow fits on screen:
-                    // This is the worst case so it fits on a phone - infowindow height of 535
-                    // + 100 pixels = 635
-                    // app.map.panBy(0, -305);
-                    var panAdjust = 635 - $(window).height()/2;
-                    if (panAdjust > 0) {
-                        app.map.panBy(0, -panAdjust);
-                    }
-                    console.log('InfoWindow Position:' + appiw.infowindow.getPosition());
                     markers[i].setAnimation(google.maps.Animation.DROP);
                     markers[i].setIcon(highlightedIcon);
-                    // console.log('appiw:');
-                    // console.log(appiw);
                     appiw.ViewModel.getPlacesDetails(markers[i], appiw.infowindow);
                     break;
                 }
@@ -324,8 +312,8 @@ var google = google || {};  // Google top level (google.maps.*)
                 var iwcontent = '<div id="info-window" data-bind="template: {name: \'info-window-template\', data: appiw.ViewModel.iwdata}"></div>';
                 appiw.ViewModel.iwdata.title = marker.title;
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    console.log('Successful query to Google Maps, Places API:');
-                    console.log(place);
+                    // console.log('Successful query to Google Maps, Places API:');
+                    // console.log(place);
                     // For each potential information element from places details, need to check
                     // if it's present - it may or may not be
                     /* Use marker.title instead
@@ -357,8 +345,6 @@ var google = google || {};  // Google top level (google.maps.*)
                     appiw.ViewModel.iwdata.place.error = true;
                 }
 
-                console.log('getPlacesDetails/iwdata:');
-                console.log(appiw.ViewModel.iwdata);
                 infowindow.setContent(iwcontent);
 
                 // Bind InfoWindow to KO Template
@@ -418,18 +404,9 @@ var google = google || {};  // Google top level (google.maps.*)
                     if (errThrown) {
                         console.log('Error thrown:  "' + errThrown + '".');
                     }
-                    /*
-                    console.log('reqObj:');
-                    console.log(reqObj);
-                    */
                     // Update photo div appropriately (Flickr unavailable...)
                 })
                 .always(function(reqRespObj, reqStat) {
-                    /*
-                    console.log('Query completed with status "' + reqStat + '".');
-                    console.log('reqRespObj:');
-                    console.log(reqRespObj);
-                    */
                     var photoData;
 
                     if (reqStat === 'success') {
@@ -480,14 +457,43 @@ var google = google || {};  // Google top level (google.maps.*)
                         if (Number(appiw.ViewModel.iwdata.photoTotal()) > 1) {
                             appiw.ViewModel.iwdata.showPhotoCtl(true);
                         }
-
-                        console.log('InfoWindow Dimensions:');
-                        console.log('Height:  ' + $('#info-window').height());
-                        console.log('Height:  ' + appiw.infowindow.height);
-                        console.log('Width:  ' + $('#info-window').width());
-                        console.log('Width:  ' + appiw.infowindow.width);
-                        console.log('infowindow:');
-                        console.log(appiw.infowindow);
+                        // Now Pan down so InfoWindow fits on screen:
+                        /*  Height Adjustments:
+                            Title - 15 (all have a title)
+                            Address - 30 (most have, sometimes wrap so 30 vs 15)
+                            Phone# - 15 (some have)
+                            URL - 15 (some have)
+                            Hours - 135 (a few have)
+                            Picture - 255 (all have at least one picture)
+                            Source - 15 (all have)
+                            Buttons - 36 (most have)
+                            Framing Divs - 19 (all have)
+                            Buffer so not right at top of screen - 10
+                            +35-40 if width < 768
+                        */
+                        var panAdjust = 0 + 15 + 255 + 15 + 19 + 10;
+                        if (appiw.ViewModel.iwdata.place.formatted_address) {
+                            panAdjust += 30;
+                        }
+                        if (appiw.ViewModel.iwdata.place.formatted_phone_number) {
+                            panAdjust += 15;
+                        }
+                        if (appiw.ViewModel.iwdata.place.website) {
+                            panAdjust += 15;
+                        }
+                        if (appiw.ViewModel.iwdata.place.opening_hours) {
+                            panAdjust += 135;
+                        }
+                        if (Number(appiw.ViewModel.iwdata.photoTotal()) > 1) {
+                            panAdjust += 36;
+                        }
+                        if ($(window).width() < 768) {
+                            panAdjust += 50;
+                        }
+                        panAdjust -= Math.ceil($(window).height()/2);
+                        if (panAdjust > 0) {
+                            app.map.panBy(0, -panAdjust);
+                        }
                 }
             }
             /* Notes:
@@ -509,10 +515,6 @@ var google = google || {};  // Google top level (google.maps.*)
 $.getJSON('places.json')
     .done(function(jsonData, reqStat, reqObj) {
         console.log('Loading places data finished with status "' + reqStat + '".');
-        /*
-        console.log('jsonData:');
-        console.log(jsonData);
-        */
         app.pointsOfInterest = jsonData;
     })
     .fail(function(reqObj, reqStat, errThrown) {
@@ -522,11 +524,6 @@ $.getJSON('places.json')
         }
     })
     .always(function(reqRespObj, reqStat) {
-        /*
-        console.log('Query completed with status "' + reqStat + '".');
-        console.log('reqRespObj:');
-        console.log(reqRespObj);
-        */
         if (reqStat !== 'success') {
             console.log('Failed to load places data - loading error marker.');
             app.pointsOfInterest[0] = {title: 'Failed to load Wixom Points of Interest',
