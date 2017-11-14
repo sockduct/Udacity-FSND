@@ -1,0 +1,6 @@
+*.pyc
+app_secret.json
+catalog.db
+client_secret_google.json
+examples/
+
