@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+  {% block main_content %}
+    <!-- Built up from dashboard template -->
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-6 col-sm-offset-3 col-md-8 col-md-offset-2 main">
+
+          <h1 class="page-header">Add Photo</h1>
+
+          <form class="form-photo-add" id="photo-add-form1" method="post" enctype="multipart/form-data">
+
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Photo Title</span>
+            <label for="inputTitle" class="sr-only">Title</label>
+            <!-- Got rid of "required" before autofocus so can use Cancel button -->
+            <input type="text" id="inputTitle" name="name" class="form-control" placeholder="My Photo" value="{{photo.name}}" aria-describedby="basic-addon1" autofocus>
+          </div>
+
+          <br>
+
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon2">Photo File</span>
+            <label for="inputFile" class="sr-only">File</label>
+            <input type="file" id="inputFile" name="file" class="form-control" placeholder="Path/to/My_Photo.png" value="{{photo.file}}" aria-describedby="basic-addon2">
+          </div>
+
+          <br>
+
+          <button class="btn btn-lg btn-primary" type="submit" name="submit-add" value="submit-add">Submit</button>
+          <a href="/catalog" class="btn btn-lg btn-default">Cancel</a>
+          <span id="helpBlock4" class="help-block help-customize">{{submit_error}}</span>
+
+        </form>
+
+        </div>
+      </div>
+    </div>
+  {% endblock %}
