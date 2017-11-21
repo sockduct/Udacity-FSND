@@ -139,6 +139,18 @@ if cfg_file:
     except ValueError as e:
         print('Unable to read app secret key from app_secret.json ({}) - will generate it...'
               ''.format(e))
+if SECRET_KEY:
+    app.secret_key = SECRET_KEY
+else:
+    # If we have to generate an app secret key then save it - that way if the app
+    # is restarted, we'll still use the same secret key.  I believe this is needed
+    # so that persistent user cookies ("websession") remain valid.
+    # Got this implementation idea from Google docs
+    random_state = hashlib.sha256(os.urandom(1024)).hexdigest()
+    app.secret_key = random_state
+    # Save
+    with open(os.path.join(os.path.dirname(__file__), 'app_secret.json'), 'w') as key_file:
+        json.dump(random_state, key_file)
 
 
 # Metadata
@@ -986,23 +998,7 @@ def disconnect():
         websession.pop(field, None)
 
 
-def state_setup():
-    if SECRET_KEY:
-        app.secret_key = SECRET_KEY
-    else:
-        # If we have to generate an app secret key then save it - that way if the app
-        # is restarted, we'll still use the same secret key.  I believe this is needed
-        # so that persistent user cookies ("websession") remain valid.
-        # Got this implementation idea from Google docs
-        random_state = hashlib.sha256(os.urandom(1024)).hexdigest()
-        app.secret_key = random_state
-        # Save
-        with open(os.path.join(os.path.dirname(__file__), 'app_secret.json'), 'w') as key_file:
-            json.dump(random_state, key_file)
-
-
 if __name__ == '__main__':
-    state_setup()
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
 
