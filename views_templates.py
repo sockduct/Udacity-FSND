@@ -59,7 +59,11 @@ import time
 #        of global constants where it makes sense
 # SQLAlchemy setup - create an instance of a connection to the underlying
 # database
-engine = create_engine('sqlite:///catalog.db')
+# Default database - SQLite:
+DB_PATH = os.path.join(os.path.dirname(__file__), 'catalog.db')
+engine = create_engine('sqlite:///' + DB_PATH)
+# Use PostgreSQL, with user catalog:
+# engine = create_engine('postgresql+psycopg2://catalog:NEKpPllvkcVEP4W9QzyIgDbKH15NM1I96BclRWG5@/catalog')
 # Not sure what this does or if it's needed
 Base.metadata.bind = engine
 # Create ORM handle to underlying database
@@ -69,11 +73,12 @@ session = DBSession()
 #
 # Flask setup
 app = Flask(__name__)
-auth = HTTPBasicAuth() 
+auth = HTTPBasicAuth()
 #
 # OAuth setup
 OAUTH_CLIENT_FILE = 'client_secret_google.json'
-CLIENT_ID = json.loads(open(OAUTH_CLIENT_FILE).read())['web']['client_id']
+OAUTH_CLIENT_FILE_PATH = os.path.join(os.path.dirname(__file__), OAUTH_CLIENT_FILE)
+CLIENT_ID = json.loads(open(OAUTH_CLIENT_FILE_PATH).read())['web']['client_id']
 
 
 # Metadata
@@ -169,7 +174,7 @@ def login(provider):
             response = make_response(json.dumps('Failed to upgrade the authorization code.'), 401)
             response.headers['Content-Type'] = 'application/json'
             return response
-          
+
         # Check that the access token is valid.
         access_token = credentials.access_token
         url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % access_token)
@@ -179,7 +184,7 @@ def login(provider):
         if result.get('error') is not None:
             response = make_response(json.dumps(result.get('error')), 500)
             response.headers['Content-Type'] = 'application/json'
-            
+
         # # Verify that the access token is used for the intended user.
         # gplus_id = credentials.id_token['sub']
         # if result['user_id'] != gplus_id:
@@ -203,19 +208,19 @@ def login(provider):
         print "Step 2 Complete! Access Token : %s " % credentials.access_token
 
         #STEP 3 - Find User or make a new one
-        
+
         #Get user info
         h = httplib2.Http()
         userinfo_url =  "https://www.googleapis.com/oauth2/v1/userinfo"
         params = {'access_token': credentials.access_token, 'alt':'json'}
         answer = requests.get(userinfo_url, params=params)
-      
+
         data = answer.json()
 
         name = data['name']
         picture = data['picture']
         email = data['email']
-        
+
         print('Received:\nName:  {}\nPicture:  {}\nEmail:  {}\n'.format(name, picture, email))
         #see if user exists, if it doesn't make a new one
         user = session.query(User).filter_by(email=email).first()
@@ -230,10 +235,10 @@ def login(provider):
         #STEP 4 - Make token
         token = user.generate_auth_token(600)
 
-        #STEP 5 - Send back token to the client 
+        #STEP 5 - Send back token to the client
         print('Generated auth token:  {}'.format(token))
         return jsonify({'token': token.decode('ascii')})
-        
+
         #return jsonify({'token': token.decode('ascii'), 'duration': 600})
     else:
         return 'Unrecoginized Provider'
@@ -271,7 +276,7 @@ def registerUser():
     user.hash_password(password)
     session.add(user)
     session.commit()
-    return (jsonify({'username': user.username}), 201, {'Location': 
+    return (jsonify({'username': user.username}), 201, {'Location':
             url_for('get_user', id=user.id, _external=True)})
 
 

@@ -12,6 +12,7 @@ from __future__ import absolute_import      # prevent implicit relative imports 
 from __future__ import unicode_literals     # all string literals treated as unicode strings
 
 # Imports
+import os
 # My database table classes
 from models import Base, Category, Item, User
 # SQLAlchemy extension to map classes to database tables
@@ -25,7 +26,11 @@ from sqlalchemy import create_engine
 
 # Globals
 # SQLAlchemy setup - create an instance of a connection to the underlying database
-engine = create_engine('sqlite:///catalog.db')
+# Default database - SQLite:
+DB_PATH = os.path.join(os.path.dirname(__file__), 'catalog.db')
+engine = create_engine('sqlite:///' + DB_PATH)
+# Use PostgreSQL, with user catalog:
+# engine = create_engine('postgresql+psycopg2://catalog:NEKpPllvkcVEP4W9QzyIgDbKH15NM1I96BclRWG5@/catalog')
 # Create ORM handle to underlying database
 DBSession = sessionmaker(bind=engine)
 # Used to interact with underlying database

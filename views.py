@@ -57,6 +57,7 @@ import httplib2
 import json
 import os
 import requests
+import sys
 #
 # Flask:
 from flask import (abort, flash, Flask, g, jsonify, make_response, render_template, redirect,
@@ -92,7 +93,11 @@ from helpers import (authed_user, check_user_info, get_user_byid, valid_json,
 #        of global constants where it makes sense
 #
 # SQLAlchemy setup - create an instance of a connection to the underlying database
-engine = create_engine('sqlite:///catalog.db')
+# Default database - SQLite:
+DB_PATH = os.path.join(os.path.dirname(__file__), 'catalog.db')
+engine = create_engine('sqlite:///' + DB_PATH)
+# Use PostgreSQL, with user catalog:
+# engine = create_engine('postgresql+psycopg2://catalog:NEKpPllvkcVEP4W9QzyIgDbKH15NM1I96BclRWG5@/catalog')
 # Create ORM handle to underlying database
 DBSession = sessionmaker(bind=engine)
 # Used to interact with underlying database
@@ -112,7 +117,8 @@ auth = HTTPBasicAuth()
 #
 # OAuth 2 Setup
 CLIENT_SECRET_FILE = 'client_secret_google.json'
-OAuth_Client_Info = json.loads(open(CLIENT_SECRET_FILE).read())['web']
+CLIENT_SECRET_FILE_PATH = os.path.join(os.path.dirname(__file__), CLIENT_SECRET_FILE)
+OAuth_Client_Info = json.loads(open(CLIENT_SECRET_FILE_PATH).read())['web']
 CLIENT_ID = OAuth_Client_Info['client_id']
 #
 # Default item picture file and storage
@@ -124,7 +130,7 @@ USER_TYPE = 'user'
 cfg_file = None
 SECRET_KEY = None
 try:
-    cfg_file = open('app_secret.json')
+    cfg_file = open(os.path.join(os.path.dirname(__file__), 'app_secret.json'))
 except IOError as e:
     print('app_secret.json not found ({}) - will generate app secret key...'.format(e))
 if cfg_file:
@@ -980,7 +986,7 @@ def disconnect():
         websession.pop(field, None)
 
 
-if __name__ == '__main__':
+def state_setup():
     if SECRET_KEY:
         app.secret_key = SECRET_KEY
     else:
@@ -991,8 +997,12 @@ if __name__ == '__main__':
         random_state = hashlib.sha256(os.urandom(1024)).hexdigest()
         app.secret_key = random_state
         # Save
-        with open('app_secret.json', 'w') as key_file:
+        with open(os.path.join(os.path.dirname(__file__), 'app_secret.json'), 'w') as key_file:
             json.dump(random_state, key_file)
+
+
+if __name__ == '__main__':
+    state_setup()
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
 

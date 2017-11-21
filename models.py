@@ -224,6 +224,10 @@ class Item(Base):
         }
 
 
-engine = create_engine('sqlite:///catalog.db')
+# Default database - SQLite:
+DB_PATH = os.path.join(os.path.dirname(__file__), 'catalog.db')
+engine = create_engine('sqlite:///' + DB_PATH)
+# Use PostgreSQL, with user catalog:
+# engine = create_engine('postgresql+psycopg2://catalog:NEKpPllvkcVEP4W9QzyIgDbKH15NM1I96BclRWG5@/catalog')
 Base.metadata.create_all(engine)
 

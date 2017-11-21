@@ -7,6 +7,7 @@
 ###################################################################################################
 
 # Imports
+import os
 # SQLAlchemy extension to map classes to database tables
 from sqlalchemy.ext.declarative import declarative_base
 # SQLAlchemy database table column type and related column data types
@@ -111,7 +112,11 @@ class Item(Base):
 
 # SQLAlchemy setup - create an instance of a connection to the underlying
 # database
-engine = create_engine('sqlite:///catalog.db')
+# Default database - SQLite:
+DB_PATH = os.path.join(os.path.dirname(__file__), 'catalog.db')
+engine = create_engine('sqlite:///' + DB_PATH)
+# Use PostgreSQL, with user catalog:
+# engine = create_engine('postgresql+psycopg2://catalog:NEKpPllvkcVEP4W9QzyIgDbKH15NM1I96BclRWG5@/catalog')
 # Check for existence of user defined classes/tables, if not present then create
 # them
 Base.metadata.create_all(engine)
