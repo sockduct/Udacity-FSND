@@ -1,0 +1,6 @@
+# Ignore videos directory
+P1-Project\ WebCasts/
+
+# Sublime stuff
+Project1.sublime-*
+
