@@ -4,79 +4,103 @@
 
 =======
 
-# Item Catalog Application Project
-## Project 4
+# Linux Server (Hosting [Item Catalog Application](https://github.com/sockduct/FSND-Project-4/))
+## Project 6
 
 ### Project Purpose and Notes
-This project allows the creation of an item catalog.  An optional database_setup.py script is included to populate the database with example sports items.  The catalog has a web interface (for humans) and an API interface (for programs).  The web interface supports creating local accounts or using an external Google account by leveraging OAuth2.  The API interface currently only supports local authentication.  In addition, the API supports exchanging local credentials for a Token to support speedier access.  Both the web and API interfaces support CRUD (Create/Read/Update/Delete) functionality.  The API interface however currently allows access to more of the database tables then the web interface.  The one exception is that image uploading currently only works through the web interface.
-Note:  The web application uses [Bootstrap v3.x](https://getbootstrap.com/docs/3.3/) and is based on the dashboard example template.
+This project takes the web application created in Project 4 and hosts it on an AWS Lightsail VPS.  The purpose is to setup the created web application on a hosted Linux server.  As part of this solution, the server is locked down and secured.  The integral web app backend database (PostgreSQL) is also setup on the server.
+
+##### Review Details:
+* Instance IP address:  34.201.23.222
+* Instance SSH port:  2200
+* Web App URL:  http://34.201.23.222
+* Installed packages and configuration changes - please see installation and requirements below
+* Resources used to complete this project:
+  * [Udacity Configuring Linux Web Servers Course](https://www.udacity.com/course/configuring-linux-web-servers--ud299)
+  * [PostgreSQL Documentation](https://www.postgresql.org/docs/9.5/static/index.html)
+  * [Flask Documentation](http://flask.pocoo.org/docs/0.12/)
+  * StackOverflow - mainly to figure out where to look in the docs for PostgreSQL (authentication with UNIX Domain Sockets) and Flask (how to connect my app into Apache through WSGI)
+  * [Learning Python, 5th Edition](https://www.safaribooksonline.com/library/view/learning-python-5th/9781449355722/) - good general resource for understanding Python at a deep level, especially helpful for understanding scope and imports
+
+##### Notes:
+* The database has been changed to a local PostgreSQL instance (from a simple SQLite file)
+* Connectivity between the web app and the database is via UNIX Domain Sockets using local database authentication (md5)
+* An optional database_setup.py script is included to populate the database with example sports items
+* For additional details, please see [the Project 4 README](https://github.com/sockduct/FSND-Project-4/blob/master/README.md)
 
 ### Installation and Requirements
-* Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-* Install [Vagrant](https://www.vagrantup.com/downloads.html)
-* Clone [this](https://github.com/sockduct/UdacityFullStackVM) repository with git
-* From the repo's vagrant directory, run:  `vagrant up`
-* Login to the VM:  `vagrant ssh`
-* Change to the catalog project directory:  `cd /vagrant/catalog`
-* Optionally populate the database:  `python database_setup.py`
-* Launch the application:  `python views.py`
-  * Note:  The script cannot be run directly because it has Windows-style line endings
+* Setup an [AWS Lightsail VPS](https://amazonlightsail.com/) running Ubuntu 16.04 - the smallest VPS is fine
+* In the [Lightsail Console](https://lightsail.aws.amazon.com/ls/webapp/home/resources) add TCP/2200 to the allowed ports in the firewall
+* Install the following Ubuntu packages:
+  ```
+  sudo apt-get update
+  sudo apt-get install apache2 libapache2-mod-wsgi postgresql python-httplib2 python-requests python-flask python-flask-httpauth python-oauth2client python-sqlalchemy python-itsdangerous python-passlib python-redis python-psycopg2
+  ```
+* Not available as a distro package, install directly from Python Package Index ([PyPI](https://pypi.python.org/))
+  `sudo pip install Flask-Uploads`
+* Update the Ubuntu Server:
+  ```
+  sudo apt-get update
+  sudo apt-get upgrade
+  sudo apt-get autoremove
+  ```
+* After the package upgrade is completed, the server may require a reboot.  If so, reboot at this point:
+  `sudo reboot`
+* From /var/www/html, Clone [this](https://github.com/sockduct/FSND-Project-6) repository to catalog:
+  `sudo git clone https://github.com/sockduct/FSND-Project-6 catalog`
+* Create/supply the following files in the catalog directory:
+  * app_secret.json - used to store flask app secret key used to secure client sessions
+  * client_secret_google.json - used for Google OAUTH
+* Update the ssh config (/etc/ssh/sshd_config):
+  * Comment out:  Port 22
+  * Add:  Port 2200
+  * Change:  PermitRootLogin no
+  * Change:  PasswordAuthentication no
+  * Restart ssh after config change:  `sudo service ssh restart`
+* Setup the server firewall using ufw:
+  ```
+  sudo ufw status
+  sudo ufw default deny incoming
+  sudo ufw default allow outgoing
+  sudo ufw allow 2200/tcp
+  sudo ufw allow www
+  sudo ufw allow ntp
+  sudo ufw enable
+  sudo ufw status
+  ```
+* Configure Apache on the server:
+  * Create catalogapp.wsgi in /var/www/html:
+      ```
+      import sys
+      sys.path.insert(0, '/var/www/html/catalog')
 
-### Project Requirements
+      import views as application
+      ```
+  * Edit /etc/apache2/sites-enabled/000-default.conf:
+    * Add before </VirtualHost>:  WSGIScriptAlias / /var/www/html/catalogapp.wsgi
+  * After changing above, restart Apache:
+    `sudo apache2ctl restart`
+* Configure PostgreSQL database on server:
+  * Create user "catalog":  `sudo -u postgres createuser -D -E -P -R -S catalog`
+    * Note:  If you change the password from what's used in the Python scripts, then all relevant scripts must be updated
+  * Create database "catalog" owned by user "catalog":  `sudo -u postgres createdb -O catalog catalog`
+  * Allow encrypted username/password authentication using UNIX Domain Sockets for communication between the web app and the database
+    * Add following auth entry to /etc/postgresql/9.5/main/pg_hba.conf:
+      * Before this entry:
+        `local   all             all                                     peer`
+      * Add the following:
+        ```
+        # "local" is for Unix domain socket connections only
+        local   catalog         catalog                                 md5
+        ```
+  * Re-read config files (use SIGHUP):
+    * Assuming current PostgreSQL version is 9.5 and cluster name is main:
+      `pg_ctlcluster 9.5 main reload`
+
+### Project Requirements/Solution Layout
 * The project implements a JSON endpoint that serves the same information as displayed in the HTML endpoints for an arbitrary item in the catalog
-* Website reads category and item information from a database ([SQLite](https://www.sqlite.org) used)
-* Website includes a form allowing users to add new items and correctly processes submitted forms
-* Website includes a form to edit/update a current record in the database table and correctly processes submitted forms
-* Website includes a function to delete a current record
-* Create, delete and update operations consider authorization status prior to execution
-* Page implements a third-party authentication & authorization service ([Google OAuth2/OpenID Connect](https://developers.google.com/identity/protocols/OAuth2) used)
-* Site has a 'Login' and 'Logout' button/link
-* Code complies with [PEP 8 style guide](https://www.python.org/dev/peps/pep-0008/)
-* README (this file) and good comments in code
-
-### Project Solution Layout
-#### views.py (Program Layout)
-* Web Interface (Human using Browser)
-  * show_catalog - Display all categories and items in the database
-  * show_category - Show single category and items within that category
-  * show_item - Show single item with additional detail
-  * add_item - Form to add an item, requires authenticated user/session (cookie used for this)
-  * edit_item - Form to edit an existing item, requires authenticated user/session, user may only edit items he/she created
-  * delete_item - Form to delete an existing item, requires authenticated user/session, user may only delete items he/she created
-* API Interface (Programmatic Access)
-  * create_category_api - Create a new category name (currently only possible via API or direct database access), requires username/password or token using HTTP basic authentication, accepts/outputs JSON
-  * create_item_api - Create a new item, requires authentication, only single item creation (as opposed to a list of multiple items) currently supported, accepts/outputs JSON
-  * show_catalog_api - Output all categories and items, outputs JSON
-  * read_category_api - Output individual category, accepts JSON (pass in category ID number), outputs JSON
-  * read_item_api - Output individual item, accepts JSON (pass in item ID number), outputs JSON
-  * read_item_picture_api - Output picture file, doesn't currently work
-  * update_category_api - Update existing category (rename), requires authentication, user must be category creator, accepts JSON (pass in category ID number and new category name), outputs JSON
-  * update_item_api - Update existing item, requires authentication, user must be item creator, accepts JSON (pass in item ID number and new item name, new item description, new item category name (must currently exist)), outputs JSON
-  * update_item_picture_api - Not yet implemented...
-  * delete_category_api - Delete existing category, requires authentication, user must be category creator, accepts JSON (pass in category ID number), outputs JSON
-  * delete_item_api - Delete existing item, requires authentication, user must be item creator, accepts JSON (pass in item ID number), outputs JSON
-* Authentication Functions
-  * verify_password - API authentication verification for username/password or token
-  * get_auth_token - Requires authentication, returns identity token for user which lasts one hour
-  * get_resource - Test API, requires authentication, returns basic user info for authenticated session
-  * signin - Web authentication form supporting local and OAuth2/OpenID Connect (Goolge) authentication
-  * signout - Logout
-  * signup - Web for to create local account
-  * gconnect - Handle OAuth2 login using Google as provider
-  * gdisconnect - Handle OAuth2 logout using Google as provider
-  * disconnect - Generic logout dealing with different providers (Local/Google)
-#### models.py (Program Layout)
-* User - SQLAlchemy user model (database fields and supporting methods)
-* Category - SQLAlchemy category model
-* Item - SQLAlchemy item model
-#### helpers.py (Program Layout)
-* Various helper functions support views.py
-
-### Example Project Output
-* Web Interface (e.g., using Chrome):
-  ![Catalog Home View with Example Sports Items](Web_App_Picture.png)
-* API Interface (e.g., using Postman):
-  ![API Access to Catalog Home Using Postman](API_Example.png)
+* README (this file)
+* This uses the web app created in Project 4, please see [that README](https://github.com/sockduct/FSND-Project-4/blob/master/README.md) for a complete overview of that project
 
 ### License
 [MIT License](license.txt)
