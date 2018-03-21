@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+  {% block main_content %}
+    <!-- Built up from dashboard template -->
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-6 col-sm-offset-3 col-md-8 col-md-offset-2 main">
+
+          <h1 class="page-header">{{cud_type}} Item</h1>
+
+          <form class="form-item-cud" id="item-cud-form1" method="post" enctype="multipart/form-data">
+
+          {% if title_error %}
+            <div class="alert alert-danger alert-dismissible" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              <span class="sr-only"><strong>Error:</strong></span>{{title_error}}
+              <!--span id="helpBlock1" class="help-block help-customize">{{title_error}}</span-->
+            </div>
+          {% endif %}
+
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Item Title</span>
+            <label for="inputTitle" class="sr-only">Title</label>
+            {% if read_only %}
+              <input type="text" id="inputTitle" name="name" class="form-control" placeholder="My Item" value="{{item.name}}" aria-describedby="basic-addon1" disabled>
+            {% else %}
+              <!-- Got rid of "required" before autofocus so can use Cancel button -->
+              <input type="text" id="inputTitle" name="name" class="form-control" placeholder="My Item" value="{{item.name}}" aria-describedby="basic-addon1" autofocus>
+            {% endif %}
+          </div>
+
+          <br>
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h3 class="panel-title">Item Description</h3>
+            </div>
+            <div class="panel-body">
+              <label for="inputContent" class="sr-only">Description</label>
+              {% if read_only %}
+                <!-- Got rid of "required" before autofocus so can use Cancel button -->
+                <textarea class="form-control" rows="6" name="description" placeholder="A superb piece of equipment with..." disabled>{{item.description}}</textarea>
+              {% else %}
+                <textarea class="form-control" rows="6" name="description" placeholder="A superb piece of equipment with...">{{item.description}}</textarea>
+              {% endif %}
+              <span id="helpBlock2" class="help-block help-customize">{{description_error}}</span>
+            </div>
+          </div>
+
+          {% if file_error %}
+            <div class="alert alert-danger alert-dismissible" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              <span class="sr-only"><strong>Error:</strong></span>{{file_error}}
+              <!--span id="helpBlock4" class="help-block help-customize">{{file_error}}</span-->
+            </div>
+          {% endif %}
+
+          <div class="input-group">
+            <img src={{item.picture}} alt="Item Picture" style="border: 1px solid gray; border-radius: 3px; vertical-align: middle; max-height: 70px; max-width: 105px">
+            <span class="input-group-addon" id="basic-addon2" style="width: 30%;">Select Different Picture File</span>
+            <label for="inputFile" class="sr-only">File</label>
+            {% if read_only %}
+              <!-- Note - can't specify default value or placeholder due to security reasons -->
+              <input type="file" id="inputFile" name="file" class="form-control" aria-describedby="basic-addon2" style="float: none;" disabled>
+            {% else %}
+              <input type="file" id="inputFile" name="file" class="form-control" aria-describedby="basic-addon2" style="float: none;">
+            {% endif %}
+          </div>
+
+          {% if category_error %}
+            <div class="alert alert-danger alert-dismissible" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              <span class="sr-only"><strong>Error:</strong></span>{{category_error}}
+              <!--span id="helpBlock3" class="help-block help-customize">{{category_error}}</span-->
+            </div>
+          {% endif %}
+
+          <br>
+          <div class="input-group">
+            <label for="inputTags" class="sr-only">Category</label>
+            <span class="input-group-addon" id="basic-addon3">Item Category</span>
+            {% if read_only %}
+              <select class="form-control" name="category" disabled>
+            {% else %}
+              <select class="form-control" name="category">
+            {% endif %}
+                {% for category in categories %}
+                  {% if item.category.name == category.name %}
+                    <option selected>{{category.name}}</option>
+                  {% else %}
+                    <option>{{category.name}}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+          </div>
+
+          <br>
+          {% if cud_type == "Delete" %}
+            <!-- Delete Button - modal trigger -->
+            <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">Delete</button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Delete Item Confirmation</h4>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure you want to delete the item {{item.name}}?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" name="submit-delete" value="submit-delete" onclick="document.getElementById('item-cud-form1').submit()">Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <a href="/catalog/item/{{item.iid}}" class="btn btn-lg btn-default">Cancel</a>
+          {% elif cud_type == "Add" %}
+            <button class="btn btn-lg btn-primary" type="submit" name="submit-add" value="submit-add">Submit</button>
+            <a href="/catalog" class="btn btn-lg btn-default">Cancel</a>
+          {% elif cud_type == "Edit" %}
+            <button class="btn btn-lg btn-primary" type="submit" name="submit-update" value="submit-update">Update</button>
+            <a href="/catalog/item/{{item.iid}}" class="btn btn-lg btn-default">Cancel</a>
+          {% endif %}
+          <span id="helpBlock4" class="help-block help-customize">{{submit_error}}</span>
+
+        </form>
+
+        </div>
+      </div>
+    </div>
+  {% endblock %}
