@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+  <!-- Page specific CSS -->
+  {% block page_css %}
+    <link href="/static/css/sign.css" rel="stylesheet">
+
+    <!-- Required for Google Auth via OAuth 2 -->
+    <meta name="google-signin-client_id" content="{{client_id}}">
+  {% endblock %}
+
+  {% block header_content %}
+    <!-- Navigation Bar Right Side Links -->
+    <li class="active"><a href="/signup">I don't have an acccount! - Sign up</a></li>
+  {% endblock %}
+
+  {% block main_content %}
+    <div class="container">
+      <form class="form-signin" method="post">
+        <h2 class="form-signin-heading" id="userPrompt1">Please sign in</h2>
+        <label for="inputUsername" class="sr-only">Username</label>
+        <input type="text" id="inputUsername" name="username" class="form-control" placeholder="Username" value="{{username}}" required autofocus>
+        <span id="helpBlock1" class="help-block help-customize">{{username_error}}</span>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" value="{{password}}" required>
+        <span id="helpBlock2" class="help-block help-customize">{{password_error}}</span>
+        <div class="checkbox">
+          <label id="inputCheckbox">
+            <input type="checkbox" name="auth_cookie" value="remember"> Remember me for 30 days
+          </label>
+        </div>
+        <input type="hidden" name="state" value="{{state}}">
+        <button class="btn btn-lg btn-primary btn-block" id="localSignin1" type="submit">Compendium Sign in</button>
+        <span id="helpBlock3" class="help-block help-customize">{{auth_error}}</span>
+
+      <!-- Goolge Sign-In -->
+      <div id="custom-g-signin2"></div>
+      <script>
+        function renderButton() {
+          gapi.signin2.render('custom-g-signin2', {
+            'scope': "{{scope}}",
+            'width': 300,
+            'height': 50,
+            'longtitle': true,
+            'theme': 'dark',
+            'onsuccess': onSuccess,
+            'onfailure': onFailure
+          });
+        }
+        function onFailure(error) {
+          console.log('Sign-in error: ' + error);
+        }
+        function onSuccess(googleUser) {
+          // Useful data for your client-side scripts:
+          // console.log('GoogleUser Object:');
+          // console.log(googleUser);
+          // userSignedIn = googleUser.isSignedIn();
+          // console.log('User signed in: ' + userSignedIn)
+          var profile = googleUser.getBasicProfile();
+          // console.log('GoogleUser.getBasicProfile:');
+          // console.log(profile);
+          // Don't send this directly to your server!  Instead use an ID token:
+          console.log('ID: ' + profile.getId());
+          console.log('Full Name: ' + profile.getName());
+          console.log('Given Name: ' + profile.getGivenName());
+          console.log('Family Name: ' + profile.getFamilyName());
+          console.log('Image URL: ' + profile.getImageUrl());
+          console.log('Email: ' + profile.getEmail());
+          console.log('G Suite Domain: ' + googleUser.getHostedDomain());
+          console.log('User granted scopes: ' + googleUser.getGrantedScopes());
+
+          console.log('Requesting offline access...');
+          var auth_code;
+          googleUser.grantOfflineAccess({
+            scope: '{{scope}}'
+          }).then(function(offlineAuthResp) {
+            console.log('offlineAuthResp:');
+            console.log(offlineAuthResp);
+
+            // Check if succeeded or failed:
+            if (offlineAuthResp.hasOwnProperty('code')) {
+              var auth_code = offlineAuthResp.code;
+
+              // Hide signinButton - user auth done:
+              $('#custom-g-signin2').attr('style', 'display: none');
+
+              // Send one-time-use code to server
+              // If server responds, write 'login successful' message to web page
+              // and then redirect back to main page
+              // Note - state sent to protect against CSRF
+              $.ajax({
+                type: 'POST',
+                url: '/gconnect?state={{state}}',
+                // Always include an `X-Requested-With` header in every AJAX request,
+                // to protect against CSRF attacks.
+                headers: {
+                  'X-Requested-With': 'XMLHttpRequest'
+                },
+                contentType: 'application/octet-stream; charset=utf-8',
+                processData: false,
+                data: auth_code,
+                success: function(result) {
+                  // Handle or verify the server response.
+                  console.log('Server response result:');
+                  console.log(result);
+
+                  if (result) {
+                    $('#userPrompt1').html('Google Login Successful!<br><br>Redirecting...');
+                    $('#inputUsername').attr('style', 'display: none');
+                    $('#inputPassword').attr('style', 'display: none');
+                    $('#inputCheckbox').attr('style', 'display: none');
+                    $('#localSignin1').attr('style', 'display: none');
+
+                    setTimeout(function() {
+                      window.location.href = "/catalog";
+                    }, 1000);
+                  } else if (result['error']) {
+                    console.log('There was an error:  ' + result['error']);
+                  } else {
+                    $('#result').html('Failed to make a server-side call.  Check your configuration and console.');
+                    console.log('Failed to make a server-side call.  Check your configuration and console.');
+                  }
+                }
+              });
+            } else if (offlineAuthResp.hasOwnProperty('error')) {
+              console.log('Request for offline authorization resulted in an error:');
+              console.log(offlineAuthResp.error);
+            } else {
+              // There was an error.
+              console.log('Authorization Code was not received...');
+              console.log('offlineAuthResp:')
+              console.log(offlineAuthResp);
+            }
+
+            })
+
+            // authResp = googleUser.getAuthResponse(true);
+            // console.log('googleUser.authResponse: ' + authResp);
+            // The ID token you need to pass to your backend:
+            // var id_token = authResp.id_token;
+            // console.log("ID Token: " + id_token);
+
+
+
+          /*
+          // If code present, auth was successful
+          if (auth_code) {
+            // Hide signinButton - user auth done:
+            $('#custom-g-signin2').attr('style', 'display: none');
+
+            // Send one-time-use code to server
+            // If server responds, write 'login successful' message to web page
+            // and then redirect back to main page
+            // Note - state sent to protect against CSRF
+            $.ajax({
+              type: 'POST',
+              url: '/gconnect?state={{state}}',
+              // Always include an `X-Requested-With` header in every AJAX request,
+              // to protect against CSRF attacks.
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              contentType: 'application/octet-stream; charset=utf-8',
+              processData: false,
+              data: auth_code,
+              success: function(result) {
+                // Handle or verify the server response.
+                if (result) {
+                  $('#result').html('Login Successful!<br>' + result + '<br>Redirecting...');
+                  /* Temporarily disable...
+                  setTimeout(function() {
+                    window.location.href = "/catalog";
+                  }, 3000);
+                  */
+                /*
+                } else if (authResult['error']) {
+                  console.log('There was an error:  ' + offlineAuthResp['error']);
+                } else {
+                  $('#result').html('Failed to make a server-side call.  Check your configuration and console.');
+                  console.log('Failed to make a server-side call.  Check your configuration and console.');
+                }
+              }
+            });
+          } else {
+            // There was an error.
+            console.log('Authorization Code was not received...');
+            console.log('offlineAuthResp.error: ' + offlineAuthResp.error);
+            console.log('offlineAuthResp:')
+            console.log(offlineAuthResp);
+          }
+          */
+        };
+      </script>
+      <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+
+      </form>
+    </div> <!-- /container -->
+  {% endblock %}

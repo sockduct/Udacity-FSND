@@ -1,0 +1,918 @@
+<!-- Google Platform Library - use with web pages that integrate Google Sign-In -->
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+
+<!-- Specify your App Client ID here (obtain in Google Developer's Console) -->
+<!-- Can also specify with client_id parameter of gapi.auth2.init() method -->
+<meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
+
+<!-- Create Google Sign-In Button -->
+<!-- See optional customize Google Sign-In Button Below -->
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+<!-- After signing in with Google using default scopes (OAuth2) can access user's Google ID,
+     name, profile URL, and email address
+
+     Notes:
+     * By default, the fetch_basic_profile parameter of gapi.auth2.init() is set to true,
+       which will automatically add 'email profile openid' as scope
+     * A Google account's email address can change, so don't use it to identify a user.
+       Instead, use the account's ID, which you can get on the client with
+       getBasicProfile().getId(), and on the backend from the sub claim of the ID token.
+
+     Important: Do not use the Google IDs returned by getId() or the user's profile
+     information to communicate the currently signed in user to your backend server.
+     Instead, send ID tokens, which can be securely validated on the server.
+
+     To retrieve profile information for a user, use the getBasicProfile() method -->
+
+<script>
+  // Example 1 - Basics:
+  function onSignIn(googleUser) {
+    var profile = googleUser.getBasicProfile();
+    console.log('ID: ' + profile.getId()); // Don't send to your backend! Use an ID token instead.
+    console.log('Name: ' + profile.getName());
+    console.log('Image URL: ' + profile.getImageUrl());
+    console.log('Email: ' + profile.getEmail()); // null if the 'email' scope isn't present
+  }
+
+  // Example 2 - auth2 is initialized with gapi.auth2.init() and a user is signed in
+  if (auth2.isSignedIn.get()) {
+    var profile = auth2.currentUser.get().getBasicProfile();
+    console.log('ID: ' + profile.getId());
+    console.log('Full Name: ' + profile.getName());
+    console.log('Given Name: ' + profile.getGivenName());
+    console.log('Family Name: ' + profile.getFamilyName());
+    console.log('Image URL: ' + profile.getImageUrl());
+    console.log('Email: ' + profile.getEmail());
+  }
+
+  // Example 3 - If you want to only sign in the user and do not need to get details
+  // other than the user ID, you can disable retrieving basic profile information and
+  // request only the profile scope:
+  gapi.load('auth2', function() {
+    auth2 = gapi.auth2.init({
+      client_id: 'CLIENT_ID.apps.googleusercontent.com',
+      fetch_basic_profile: false,
+      scope: 'profile'
+    });
+
+    // Sign the user in, and then retrieve their ID.
+    auth2.signIn().then(function() {
+      console.log(auth2.currentUser.get().getId());
+    });
+  });
+</script>
+
+<!-- Securely transmit signed-in user identity to backend server -->
+<script>
+  // After user successfully signs in, get the user's ID token:
+  function onSignIn(googleUser) {
+    var id_token = googleUser.getAuthResponse().id_token;
+  }
+
+  // Then, send the ID token to your server with an HTTPS POST request:
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'https://yourbackend.example.com/tokensignin');
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function() {
+    console.log('Signed in as: ' + xhr.responseText);
+  };
+  xhr.send('idtoken=' + id_token);
+
+  /* On the backend which receives the HTTPS POST, verify ID token integrity:
+     * The ID token must be properly signed by Google. Use Google's public keys (available
+       in JWK or PEM format) to verify the token's signature.
+     * The value of aud in the ID token is equal to one of your app's client IDs. This
+       check is necessary to prevent ID tokens issued to a malicious app being used to
+       access data about the same user on your app's backend server.
+     * The value of iss in the ID token is equal to accounts.google.com or
+       https://accounts.google.com.
+     * The expiry time (exp) of the ID token has not passed.
+     * If you want to restrict access to only members of your G Suite domain, verify
+       that the ID token has an hd claim that matches your G Suite domain name.
+
+// Python Code:
+from oauth2client import client, crypt
+
+# (Receive token by HTTPS POST)
+try:
+    idinfo = client.verify_id_token(token, CLIENT_ID)
+
+    # Or, if multiple clients access the backend server:
+    # idinfo = client.verify_id_token(token, None)
+    # if idinfo['aud'] not in [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]:
+    #     raise crypt.AppIdentityError("Unrecognized client.")
+
+    if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+        raise crypt.AppIdentityError("Wrong issuer.")
+
+    # If auth request is from a G Suite domain:
+    # if idinfo['hd'] != GSUITE_DOMAIN_NAME:
+    #     raise crypt.AppIdentityError("Wrong hosted domain.")
+except crypt.AppIdentityError:
+    # Invalid token
+userid = idinfo['sub']
+
+     * The oauth2client.client.verify_id_token function verifies the JWT signature,
+       the aud claim, and the exp claim. You must also verify the iss claim and the
+       hd claim (if applicable) by examining the object that verify_id_token returns.
+       If multiple clients access the backend server, also manually verify the aud claim.
+
+     * Alternate approach for low traffic volumes - use Google's tokeninfo endpoint
+       * Drawback is relies on network so additional latency and another potential failure point
+       * To validate token "XYZ123", make GET or POST request to:
+         https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=XYZ123
+       * If token properly signed and the iss and exp claims have the expected values, you
+         will get a HTTP 200 response, where the body contains the JSON-formatted ID token
+         claims
+       * Example response from tokeninfo endpoint:
+          {
+           // These six fields are included in all Google ID Tokens.
+           "iss": "https://accounts.google.com",
+           "sub": "110169484474386276334",
+           "azp": "1008719970978-hb24n2dstb40o45d4feuo2ukqmcc6381.apps.googleusercontent.com",
+           "aud": "1008719970978-hb24n2dstb40o45d4feuo2ukqmcc6381.apps.googleusercontent.com",
+           "iat": "1433978353",
+           "exp": "1433981953",
+
+           // These seven fields are only included when the user has granted the "profile" and
+           // "email" OAuth scopes to the application.
+           "email": "testuser@gmail.com",
+           "email_verified": "true",
+           "name" : "Test User",
+           "picture": "https://lh4.googleusercontent.com/-kYgzyAWpZzJ/ABCDEFGHI/AAAJKLMNOP/tIXL9Ir44LE/s99-c/photo.jpg",
+           "given_name": "Test",
+           "family_name": "User",
+           "locale": "en"
+          }
+     * Warning: Once you get these claims, you still need to check that the aud claim
+       contains one of your app's client IDs. If it does, then the token is both valid
+       and intended for your client, and you can safely retrieve and use the user's unique
+       Google ID from the sub claim.
+   */
+</script>
+
+
+<!-- Enable user to sign out of your App (without signing out of Google) using local sign-out
+     button/link
+
+     To create a sign-out button/link, attach a function that calls the GoogleAuth.signOut()
+     method to the link's onclick event -->
+<a href="#" onclick="signOut();">Sign out</a>
+<script>
+  function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+  }
+</script>
+
+
+<!-- Optional Stuff... -->
+<!-- Customize Google Sign-in Button:  Sign in with Google:
+     * Add an element to contain sign-in button
+     * Write a function which calls signin2.render() with customized style and scope settings
+     * Include https://apis.google.com/js/platform.js script with the query string onload=YOUR_RENDER_FUNCTION -->
+<html>
+<head>
+  <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
+</head>
+<body>
+  <!-- Element which will contain Google sign-in button: -->
+  <div id="my-signin2"></div>
+  <!-- You can also specify settings for a custom Google Sign-In button by defining data-*
+       attributes to a div element with the class g-signin2
+       * For example:
+         <div class="g-signin2" data-width="300" data-height="200" data-longtitle="true">
+  -->
+  <script>
+    function onSuccess(googleUser) {
+      console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+    }
+    function onFailure(error) {
+      console.log(error);
+    }
+    function renderButton() {
+      // Function which renders custom sign-in button:
+      // Also supplies custom style/scope settings
+      gapi.signin2.render('my-signin2', {
+        'scope': 'profile email',
+        'width': 240,
+        'height': 50,
+        'longtitle': true,
+        'theme': 'dark',
+        'onsuccess': onSuccess,
+        'onfailure': onFailure
+      });
+    }
+  </script>
+
+  // Load Google JavaScript library with query string calling custom render function:
+  <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+</body>
+</html>
+
+<!-- Another customization of the Google Sign-in Button: -->
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+  <script src="https://apis.google.com/js/api:client.js"></script>
+  <script>
+    var googleUser = {};
+    var startApp = function() {
+      gapi.load('auth2', function(){
+        // Retrieve the singleton for the GoogleAuth library and set up the client.
+        auth2 = gapi.auth2.init({
+          client_id: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+          cookiepolicy: 'single_host_origin',  // Default value
+          // Request scopes in addition to 'profile' and 'email'
+          // Base scope would be use 'profile'
+          //scope: 'additional_scope'
+        });
+        attachSignin(document.getElementById('customBtn'));
+      });
+    };
+
+    function attachSignin(element) {
+      console.log(element.id);
+      auth2.attachClickHandler(element, {},
+          function(googleUser) {
+            document.getElementById('name').innerText = "Signed in: " +
+                googleUser.getBasicProfile().getName();
+          }, function(error) {
+            alert(JSON.stringify(error, undefined, 2));
+          });
+    }
+  </script>
+  <style type="text/css">
+    #customBtn {
+      display: inline-block;
+      background: white;
+      color: #444;
+      width: 190px;
+      border-radius: 5px;
+      border: thin solid #888;
+      box-shadow: 1px 1px 1px grey;
+      white-space: nowrap;
+    }
+    #customBtn:hover {
+      cursor: pointer;
+    }
+    span.label {
+      font-family: serif;
+      font-weight: normal;
+    }
+    span.icon {
+      background: url('/identity/sign-in/g-normal.png') transparent 5px 50% no-repeat;
+      display: inline-block;
+      vertical-align: middle;
+      width: 42px;
+      height: 42px;
+    }
+    span.buttonText {
+      display: inline-block;
+      vertical-align: middle;
+      padding-left: 42px;
+      padding-right: 42px;
+      font-size: 14px;
+      font-weight: bold;
+      /* Use the Roboto font that is loaded in the <head> */
+      font-family: 'Roboto', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <!-- In the callback, you would hide the gSignInWrapper element on a
+  successful sign in -->
+  <div id="gSignInWrapper">
+    <span class="label">Sign in with:</span>
+    <div id="customBtn" class="customGPlusSignIn">
+      <span class="icon"></span>
+      <span class="buttonText">Google</span>
+    </div>
+  </div>
+  <div id="name"></div>
+  <script>startApp();</script>
+</body>
+</html>
+
+
+<!-- Monitoring the user's session state:
+     * After the Google Sign-In client has been initialized, you can attach handlers that
+       check various attributes and methods of the client to determine the user's session state
+     * The following code demonstrates using the 2.0 client method attachClickHandler to create
+       a callback that either silently finishes sign-in for the user, or prompts the user to
+       re-authorize based on the state of the user's session:
+-->
+<script>
+  /**
+   * The Sign-In client object.
+   */
+  var auth2;
+
+  /**
+   * Initializes the Sign-In client.
+   */
+  var initClient = function() {
+    gapi.load('auth2', function() {
+      /**
+       * Retrieve the singleton for the GoogleAuth library and set up the
+       * client.
+       */
+      auth2 = gapi.auth2.init({
+        client_id: 'CLIENT_ID.apps.googleusercontent.com'
+      });
+
+      // Attach the click handler to the sign-in button
+      auth2.attachClickHandler('signin-button', {}, onSuccess, onFailure);
+    });
+  };
+
+  /**
+   * Handle successful sign-ins.
+   */
+  var onSuccess = function(user) {
+    console.log('Signed in as ' + user.getBasicProfile().getName());
+  };
+
+  /**
+   * Handle sign-in failures.
+   */
+  var onFailure = function(error) {
+    console.log(error);
+  };
+</script>
+
+
+<!-- Google Sign-in for Server-Side Apps
+     * OAuth2 Authorization Code Grant-type
+       * Allows access to Google APIs on behalf of the user from the app/server when the user
+         is offline.  Google calls it a "hybrid server-side flow" vs. the OAuth2 for Web server
+         apps flow
+
+     * Requirements:
+       * Step 1 - Create a Client ID and Secret:
+         * From the Google API Console choose/create a project
+         * Note:  A single project should hold all instances of the app (Android, iOS,
+           Web, ...) each with its own client ID
+         * In the API Console Credentials Pane, select OAuth consent screen and fill in
+           an email address and product name
+         * Now in the Credentials Pane create an OAuth Client ID, Web Application and fill out
+           the form
+         * Note:  The Authorized Redirect URI field doesn't require a value and isn't used
+           with JavaScript APIs
+         * Download the info to get your Client ID and Secret which your app will need
+         * Note:  If you need to access an API (e.g., Google Maps, Google Drive, ...) you
+           must enable it from the Project Library Pane - by default, all APIs are disabled
+           for the Project
+
+     * Step 2 - Include the Google platform library on your page:
+       * On the web page you'll need:
+-->
+<!-- The top of file index.html -->
+<head>
+  <!-- BEGIN Pre-requisites -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+  </script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+  </script>
+  <!-- END Pre-requisites -->
+<!--
+     * Step 3 - Initialize the GoogleAuth object:
+       * Load the auth2 library and call gapi.auth2.init() to initialize the GoogleAuth object
+       * Specify your client ID and the scopes you want to request when you call init()
+-->
+<!-- Continuing the <head> section -->
+  <script>
+    function start() {
+      gapi.load('auth2', function() {
+        auth2 = gapi.auth2.init({
+          client_id: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+          // Scopes to request in addition to 'profile' and 'email'
+          //scope: 'additional_scope'
+        });
+      });
+    }
+  </script>
+</head>
+<body>
+  <!-- ... -->
+</body>
+</html>
+<!--
+     * Step 4 - Add the sign-in button to your page:
+       * In addition, attach a click handler to call grantOfflineAccess() to start the
+         one-time-code flow.  Add where you want your sign-in button to render.
+-->
+<button id="signinButton">Sign in with Google</button>
+<script>
+  $('#signinButton').click(function() {
+    // signInCallback defined in step 6.
+    auth2.grantOfflineAccess().then(signInCallback);
+  });
+</script>
+<!--
+     * Step 5 - Sign in the user:
+       * The user clicks the sign-in button and grants your app access to the permissions
+         that you requested (hopefully!)
+       * Then, the callback function that you specified in the grantOfflineAccess().then()
+         method is passed a JSON object with an authorization code
+       * e.g., {"code":"4/yU4cQZTMnnMtetyFcIWNItG32eKxxxgXXX-Z4yyJJJo.4qHskT-UtugceFc0ZRONyF4z7U4UmAI"}
+
+     * Step 6 - Send the authorization code to the server:
+       * The code is your one-time code that your server can exchange for its own access
+         token and refresh token.  You can only obtain a refresh token after the user has
+         been presented an authorization dialog requesting offline access.  You must store
+         the refresh token that you retrieve for later use because subsequent exchanges will
+         return null for the refresh token.
+       * Access tokens are always returned with the exchange of a valid authorization code
+       * The following script defines a callback function for the sign-in button. When a
+         sign-in is successful, the function stores the access token for client-side use
+         and sends the one-time code to your server on the same domain:
+-->
+<!-- Last part of BODY element in file index.html -->
+<script>
+function signInCallback(authResult) {
+  if (authResult['code']) {
+
+    // Hide the sign-in button now that the user is authorized, for example:
+    $('#signinButton').attr('style', 'display: none');
+
+    // Send the code to the server
+    $.ajax({
+      type: 'POST',
+      url: 'http://example.com/storeauthcode',
+      // Always include an `X-Requested-With` header in every AJAX request,
+      // to protect against CSRF attacks.
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      contentType: 'application/octet-stream; charset=utf-8',
+      success: function(result) {
+        // Handle or verify the server response.
+      },
+      processData: false,
+      data: authResult['code']
+    });
+  } else {
+    // There was an error.
+  }
+}
+</script>
+<!--
+     * Step 7 - Exchange the authorization code for an access token:
+       * On the server, exchange the auth code for access and refresh tokens. Use the
+         access token to call Google APIs on behalf of the user and, optionally, store
+         the refresh token to acquire a new access token when the access token expires.
+       * If you requested profile access, you also get an ID token that contains basic
+         profile information for the user:
+
+# Example Python Code:
+from apiclient import discovery
+import httplib2
+from oauth2client import client
+
+# (Receive auth_code by HTTPS POST)
+
+# If this request does not have `X-Requested-With` header, this could be a CSRF
+if not request.headers.get('X-Requested-With'):
+    abort(403)
+
+# Set path to the Web application client_secret_*.json file you downloaded from the
+# Google API Console: https://console.developers.google.com/apis/credentials
+CLIENT_SECRET_FILE = '/path/to/client_secret.json'
+
+# Exchange auth code for access token, refresh token, and ID token
+credentials = client.credentials_from_clientsecrets_and_code(
+    CLIENT_SECRET_FILE,
+    ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
+    auth_code)
+
+# Call Google API
+http_auth = credentials.authorize(httplib2.Http())
+drive_service = discovery.build('drive', 'v3', http=http_auth)
+appfolder = drive_service.files().get(fileId='appfolder').execute()
+
+# Get profile info from ID token
+userid = credentials.id_token['sub']
+email = credentials.id_token['email']
+-->
+
+
+<!-- Disconnecting and revoking scopes
+     * It is recommended that your app provide a way to delete the association between
+       your app and a user's account. By adding this capability to your app, you can
+       respond to the event and trigger any appropriate logic such as deleting personal
+       information associated with the account.
+     * The following JavaScript example demonstrates how to revoke a user's scopes
+       programmatically: -->
+
+<script>
+  var revokeAllScopes = function() {
+    auth2.disconnect();
+  }
+</script>
+
+
+<!-- OpenID Connect Examples including anti-CSRF state
+     *** Authenticating a user - Server flow ***
+     * Step 1 - Create an anti-forgery state token
+       * Generate unique session state token sent to client
+       * Google's OAuth Login service reply should have this same token
+       * This sequence protects against X/CSRF
+
+# Example Python Code:
+# Create a state token to prevent request forgery.
+# Store it in the session (client cookie) for later validation.
+state = hashlib.sha256(os.urandom(1024)).hexdigest()
+session['state'] = state
+# Set the client ID, token state, and application name in the HTML while serving it.
+response = make_response(
+    render_template('index.html',
+                    CLIENT_ID=CLIENT_ID,
+                    STATE=state,
+                    APPLICATION_NAME=APPLICATION_NAME))
+
+     * Step 2 - Send an authentication request to Google
+       * Ideally, use Google's OpenIDConnect Discovery (JSON) Document:
+       * https://accounts.google.com/.well-known/openid-configuration
+       * Use the authorization_endpoint key to retrieve the current URL
+       * Basic request should have:
+         - client_id - app Client ID
+         - response_type - "code"
+         - scope - "openid profile email"
+         - redirect_uri - HTTP endpoint server receiving response from Google (this URI
+           specified in API Console)
+         - state - anti-forgery unique session token, as well as any other information
+           needed to recover the context when the user returns to your application, e.g.,
+           the starting URL
+         - nonce - random value generated by your app that enables replay protection when present
+         - login_hint - user's email address or the sub string, which is equivalent to the
+           user's Google ID. If you do not provide a login_hint and the user is currently logged
+           in, the consent screen includes a request for approval to release the user’s email
+           address to your app.
+         - access_type - defaults to online, if you want a refresh_token must set value to offline
+       * Example:
+         - https://accounts.google.com/o/oauth2/v2/auth?
+           client_id=424911365001.apps.googleusercontent.com&
+           response_type=code&
+           scope=openid%20email&
+           redirect_uri=https://oauth2-login-demo.example.com/code&
+           state=security_token%3D138r5719ru3e1%26url%3Dhttps://oauth2-login-demo.example.com/myHome&
+           login_hint=jsmith@example.com&
+           openid.realm=example.com&
+           nonce=0394852-3190485-2490358
+       * Note:  Users are required to give consent if your app requests any new information
+         about them, or if your app requests account access that they have not previously approved.
+
+     * Step 3 - Confirm anti-forgery state token
+       * Response sent to redirect_uri from request with query parameters:
+       * https://oa2cb.example.com/code?state=security_token%3D138r5719ru3e1%26url%3Dhttps://oa2cb.example.com/myHome&code=4/P7q7W91a-oMsCeLvIaQm6bTrgtp7
+       * On the server/in the app, validate the state token:
+
+# Python Code:
+# Ensure that the request is not a forgery and that the user sending
+# this connect request is the expected user.
+if request.args.get('state', '') != session['state']:
+    response = make_response(json.dumps('Invalid state parameter.'), 401)
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
+     * Step 4 - Exchange authorization code for access token and ID token
+       * POST the request with the auth code to the token endpoint as per the discovery
+         document using the key token_endpoint
+       * Request must include following parameters:
+        - code - authorization code that is returned from the initial request
+        - client_id - App client ID
+        - client_secret - App client secret
+        - redirect_uri - URI that you specified in the API Console
+        - grant_type - authorization_code
+       * Example Request:
+          POST /oauth2/v4/token HTTP/1.1
+          Host: www.googleapis.com
+          Content-Type: application/x-www-form-urlencoded
+
+          code=4/P7q7W91a-oMsCeLvIaQm6bTrgtp7&
+          client_id=8819981768.apps.googleusercontent.com&
+          client_secret={client_secret}&
+          redirect_uri=https://oauth2-login-demo.example.com/code&
+          grant_type=authorization_code
+       * Response contains JSON array with following fields
+         - access_token - token that can be sent to a Google API
+         - id_token - JWT that contains identity information about the user that is digitally
+           signed by Google
+         - expires_in - remaining lifetime of the access token
+         - token_type - Identifies the type of token returned, currently always "Bearer"
+         - refresh_token (optional) - only present if access_type=offline is included in the
+           authentication request
+
+     * Step 5 - Obtain user info from ID token
+       * ID Token is a JWT or crypto-signed base64 JSON object
+       * Normally critical to validate ID Token but since you got it directly from Google
+         via HTTPS using your client secret to authenticate to Google, should be OK; However,
+         if ID token passed to other app components then it must be validated before using
+       * Note:  Many libraries combine validation with decoding and parsing the JWT
+       * ID Token is a JSON object with a set of name/value pairs, e.g.:
+          {"iss":"accounts.google.com",
+           "at_hash":"HK6E_P6Dh8Y93mRNtsDB1Q",
+           "email_verified":"true",
+           "sub":"10769150350006150715113082367",
+           "azp":"1234987819200.apps.googleusercontent.com",
+           "email":"jsmith@example.com",
+           "aud":"1234987819200.apps.googleusercontent.com",
+           "iat":1353601026,
+           "exp":1353604926,
+           "nonce": "0394852-3190485-2490358",
+           "hd":"example.com" }
+       * The fields are known as claims and have the following meaning:
+         - iss (always present) - Issuer Identifier for the Issuer of the response.
+           Always https://accounts.google.com or accounts.google.com for Google ID tokens
+         - at_hash - Access token hash. Provides validation that the access token is tied
+           to the identity token. If the ID token is issued with an access token in the
+           server flow, this is always included. This can be used as an alternate mechanism
+           to protect against cross-site request forgery attacks, but if you follow Step 1
+           and Step 3 (anti-csrf state token) it is not necessary to verify the access token.
+         - email_verified - True if the user's e-mail address has been verified; otherwise false
+         - sub (always present) - identifier for the user, unique among all Google accounts
+           and never reused. A Google account can have multiple emails at different points in
+           time, but the sub value is never changed. Use sub within your application as the unique-identifier key for the user.
+         - azp - client_id of the authorized presenter. This claim is only needed when the
+           party requesting the ID token is not the same as the audience of the ID token.
+           This may be the case at Google for hybrid apps where a web application and Android
+           app have a different client_id but share the same project.
+         - email - user's email address. This may not be unique and is not suitable for use
+           as a primary key. Provided only if your scope included the string "email".
+         - profile - URL of the user's profile page. Might be provided when either the request
+           scope included the string "profile" or the ID token is returned from a token refresh;
+           When profile claims are present, you can use them to update your app's user records.
+           Note that this claim is never guaranteed to be present.
+         - picture - URL of the user's profile picture. Might be provided when either the request
+           scope included the string "profile" or the ID token is returned from a token refresh;
+           When picture claims are present, you can use them to update your app's user records.
+           Note that this claim is never guaranteed to be present.
+         - name - user's full name, in a displayable form. Might be provided when either the
+           request scope included the string "profile" or the ID token is returned from a token
+           refresh; When name claims are present, you can use them to update your app's user
+           records. Note that this claim is never guaranteed to be present.
+         - aud (always present) - Identifies the audience that this ID token is intended for.
+           It must be one of the OAuth 2.0 client IDs of your application.
+         - iat (always present) - The time the ID token was issued, represented in Unix time
+           (integer seconds).
+         - exp (always present) - The time the ID token expires, represented in Unix time
+           (integer seconds).
+         - nonce - The value of the nonce supplied by your app in the authentication request.
+           You should enforce protection against replay attacks by ensuring it is presented
+           only once.
+         - hd - The hosted G Suite domain of the user. Provided only if the user belongs to
+           a hosted domain.
+
+     * Step 6 - Authenticate the user
+       * After retrieving user info from ID token, check if user in app's database; if not
+        then either auto-add or re-direct them to sign-up and then start app session for user
+       * Can also obtain additional user info at user profile endpoints - see below
+
+     *** Advanced Topics ***
+     * Access to Other Google APIs - In addition to authentication, can use OAuth2 authorization
+       to obtain permission to use other APIs on behalf of the user such as YouTube, Goolge
+       Drive, Calendar, or others.  Use additional scopes which include the desired resources
+       - e.g., for Google Drive you'd add "https://www.googleapis.com/auth/drive" to the scope
+       list.  However, user is prompted to authorize each scope so better to only ask for
+       permission as its needed.
+
+     * Refresh tokens - Can also request a refresh token during the authorization code exchange.
+       This allows access on behalf of the user even when they're offline/not logged in to your
+       app.  To obtain this, add access_type=offline to the authentication request.
+       * Make sure to store the refresh token securely as you can only obtain one the first
+         time you perform the authorization code exchange flow
+
+     * Prompting re-consent - Can prompt user to re-authorize app by adding prompt=consent
+       parameter to authentication request
+
+     * Authentication URI Parameters - overview of parameters accepted by Google's OAuth2
+       authentication API
+       * Basic Scopes, each requested scope must be separated by a space:
+         - openid - gender, sub (unique ID for user), name (full name), given_name (first
+           name), family_name (last name), profile URL, picture URL, email, email_verified,
+           hd (Google Hosted Domain), locale
+         - profile - Google's unique ID for user, display name, image URL, profile URL
+         - email - account's email address, email_verified - boolean showing whether or
+           not email was verified, maybe other email addresses too(?)
+
+       * Additional Parameters:
+         - client_id (required) - App client ID
+         - response_type (required) - If value = "code" launches a Basic flow, requiring a
+           POST to the token endpoint to obtain the tokens. If value = "token id_token"
+           (order doesn't matter), launches an Implicit flow, requiring the use of Javascript
+           at the redirect URI to retrieve tokens from the URI #fragment.
+         - scope (required) - scope value must begin with the string openid and then include
+           profile or email or both as well as any additional desired scopes (for API access
+           on behalf of the user)
+         - nonce (required) - A random value generated by your app that enables replay protection
+         - redirect_uri (required) - Determines where the response is sent. The value of this
+           parameter must exactly match one of the values that you set in the Google API Console
+           (including the HTTP or HTTPS scheme, case, and trailing '/', if any).
+         - state (optional, but strongly recommended) - An opaque string that is round-tripped
+           in the protocol; that is to say, it is returned as a URI parameter in the Basic flow,
+           and in the URI #fragment in the Implicit flow.  The state can be useful for correlating
+           requests and responses. Because your redirect_uri can be guessed, using a state value
+           can increase your assurance that an incoming connection is the result of an
+           authentication request. If you generate a random string or encode the hash of some
+           client state (e.g., a cookie) in this state variable, you can validate the response
+           to additionally ensure that the request and response originated in the same browser.
+           This provides protection against attacks such as cross-site request forgery.
+         - prompt (optional) - A space-delimited list of string values that specifies whether the
+           authorization server prompts the user for reauthentication and consent. The possible
+           values are:
+           * none - The authorization server does not display any authentication or user consent
+             screens; it will return an error if the user is not already authenticated and has
+             not pre-configured consent for the requested scopes. You can use none to check for
+             existing authentication and/or consent.
+           * consent - The authorization server prompts the user for consent before returning
+             information to the client.
+           * select_account - The authorization server prompts the user to select a user account.
+             This allows a user who has multiple accounts at the authorization server to select
+             amongst the multiple accounts that they may have current sessions for.
+           If no value is specified and the user has not previously authorized access, then the
+           user is shown a consent screen.
+         - display (optional) - An ASCII string value for specifying how the authorization server
+           displays the authentication and consent user interface pages. The following values are
+           specified, and accepted by the Google servers, but do not have any effect on its
+           behavior: page, popup, touch, and wap.
+         - login_hint (optional) - When your app knows which user it is trying to authenticate,
+           it can provide this parameter as a hint to the authentication server. Passing this
+           hint suppresses the account chooser and either pre-fill the email box on the sign-in
+           form, or select the proper session (if the user is using multiple sign-in), which can
+           help you avoid problems that occur if your app logs in the wrong user account. The
+           value can be either an email address or the sub string, which is equivalent to the
+           user's Google ID.
+         - access_type (optional) - The allowed values are offline and online. The effect is
+           documented in Offline Access; if an access token is being requested, the client does
+           not receive a refresh token unless offline is specified.
+         - include_granted_scopes - true or false; If this is provided with the value true,
+           and the authorization request is granted, the authorization will include any
+           previous authorizations granted to this user/application combination for other
+           scopes; see Incremental Authorization.
+           * Note that you cannot do incremental authorization with the Installed App flow.
+         - hd (optional) - The hd (hosted domain) parameter streamlines the login process for
+           G Suite hosted accounts. By including the domain of the G Suite user (for example,
+           mycollege.edu), you can indicate that the account selection UI should be optimized
+           for accounts at that domain. To optimize for G Suite accounts generally instead of
+           just one domain, use an asterisk: hd=*.
+           * Don't rely on this UI optimization to control who can access your app, as
+             client-side requests can be modified. Be sure to validate that the returned ID
+             token has an hd claim value that matches what you expect (e.g. mycolledge.edu).
+             Unlike the request parameter, the ID token claim is contained within a security
+             token from Google, so the value can be trusted.
+
+     * Validating an ID token
+       * All ID tokens need to be validate unless directly retrieved from Google
+       * e.g., when sending ID tokens with requests that need to be authenticated
+       * ID tokens are sensitive and can be misused if intercepted - only transmit over HTTPS
+         via POST data or with request headers; if store then do so securely
+       * ID tokens can be passed around to different app components - the components can use
+         the ID as lightweight authentication (authenticating app and user), but only after
+         validating it!
+       * Validation of ID token
+         1) Verify that the ID token is properly signed by the issuer. Google-issued tokens
+            are signed using one of the certificates found at the URI specified in the jwks_uri
+            field of the discovery document.
+         2) Verify that the value of iss in the ID token is equal to https://accounts.google.com
+            or accounts.google.com
+         3) Verify that the value of aud in the ID token is equal to your app’s client ID
+         4) Verify that the expiry time (exp) of the ID token has not passed
+         5) If you passed a hd parameter in the request, verify that the ID token has a hd
+            claim that matches your G Suite hosted domain.
+         * Steps 2-5 are simple string/date comparisons
+         * Step 1 involveds crypto-signature checking
+           * For debugging purposes, use Google's tokeninfo endpoint; e.g., if ID token's value
+             is "XYZ123" then dereference
+             https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=XYZ123 - if token valid,
+             response would be its decoded JSON form
+           * Useful for testing (drawbacks include network latency for request and potential
+             network failure), but for prod retrieve Google's public keys from the keys endpoint
+             and locally validate - keys can be retrieved from the keys URI from the discovery
+             document using the key jwks_uri
+           * Google changes its public keys roughly daily so possible to cache - recommendation
+             is to do this with a library
+
+     * Obtaining user profile information
+       * Use the retrieved access token
+       * To be OpenID compliant, scope must inclulde openid and profile, can also optionally
+         include email - e.g., scope=openid%20email%20profile
+       * Add access token to authorization header and make HTTPS GET to the userinfo endpoint
+         - retrieve this from discovery document using key userinfo_endpoint
+
+     * The Discovery Document
+       * A JSON document containing key-value pairs with info about provider's URIs for various
+         services eneded for OpenIDConnect
+       * Google's Discovery Document URL:  https://accounts.google.com/.well-known/openid-configuration
+       * Example document:
+          {
+           "issuer": "https://accounts.google.com",
+           "authorization_endpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+           "token_endpoint": "https://www.googleapis.com/oauth2/v4/token",
+           "userinfo_endpoint": "https://www.googleapis.com/oauth2/v3/userinfo",
+           "revocation_endpoint": "https://accounts.google.com/o/oauth2/revoke",
+           "jwks_uri": "https://www.googleapis.com/oauth2/v3/certs",
+           "response_types_supported": [
+            "code",
+            "token",
+            "id_token",
+            "code token",
+            "code id_token",
+            "token id_token",
+            "code token id_token",
+            "none"
+           ],
+           "subject_types_supported": [
+            "public"
+           ],
+           "id_token_signing_alg_values_supported": [
+            "RS256"
+           ],
+           "scopes_supported": [
+            "openid",
+            "email",
+            "profile"
+           ],
+           "token_endpoint_auth_methods_supported": [
+            "client_secret_post",
+            "client_secret_basic"
+           ],
+           "claims_supported": [
+            "aud",
+            "email",
+            "email_verified",
+            "exp",
+            "family_name",
+            "given_name",
+            "iat",
+            "iss",
+            "locale",
+            "name",
+            "picture",
+            "sub"
+           ],
+           "code_challenge_methods_supported": [
+            "plain",
+            "S256"
+           ]
+          }
+-->
+
+
+<!-- Example to print a JSON-formatted list of files in a user's Google Drive after the user
+     authenticates and gives consent for the application to access the user's Drive files:
+
+# Python Code:
+import json
+
+import flask
+import httplib2
+
+from apiclient import discovery
+from oauth2client import client
+
+
+app = flask.Flask(__name__)
+
+
+@app.route('/')
+def index():
+  if 'credentials' not in flask.session:
+    return flask.redirect(flask.url_for('oauth2callback'))
+  credentials = client.OAuth2Credentials.from_json(flask.session['credentials'])
+  if credentials.access_token_expired:
+    return flask.redirect(flask.url_for('oauth2callback'))
+  else:
+    http_auth = credentials.authorize(httplib2.Http())
+    drive = discovery.build('drive', 'v2', http_auth)
+    files = drive.files().list().execute()
+    return json.dumps(files)
+
+
+@app.route('/oauth2callback')
+def oauth2callback():
+  flow = client.flow_from_clientsecrets(
+      'client_secrets.json',
+      scope='https://www.googleapis.com/auth/drive.metadata.readonly',
+      redirect_uri=flask.url_for('oauth2callback', _external=True),
+      include_granted_scopes=True)
+  if 'code' not in flask.request.args:
+    auth_uri = flow.step1_get_authorize_url()
+    return flask.redirect(auth_uri)
+  else:
+    auth_code = flask.request.args.get('code')
+    credentials = flow.step2_exchange(auth_code)
+    flask.session['credentials'] = credentials.to_json()
+    return flask.redirect(flask.url_for('index'))
+
+
+if __name__ == '__main__':
+  import uuid
+  app.secret_key = str(uuid.uuid4())
+  app.debug = False
+  app.run()
+-->
+
