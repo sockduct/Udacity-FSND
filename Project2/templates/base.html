@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come
+         *after* these tags -->
+    <meta name="description" content="Collection of Blogs">
+    <meta name="author" content="James R. Small">
+    <link rel="icon" href="/static/img/favicon.png">
+
+    <title>The Accumulator</title>
+
+    <!-- Use Bootstrap -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Customization -->
+    <link href="/static/css/customize-template.css" rel="stylesheet">
+    <!-- My Customization - Needs some work, currently breaks bootstrap layout! -->
+    <!--link href="/static/css/main.css" rel="stylesheet"-->
+
+    <!-- Page specific CSS -->
+    {% block page_css %}
+    {% endblock %}
+  </head>
+
+  <body>
+    <!-- Top Navigation Bar fixed across all pages -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <!-- Navigation Bar Title -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand navbar-brand-custom" href="/">
+            <img class="header-image" src="/static/img/brandicon.png" alt="Brand Logo">
+            The Accumulator
+          </a>
+        </div>
+
+        <!-- Navigation Bar Left Side Links -->
+        <div id="navbar" class="collapse navbar-collapse">
+          <!-- If want clickable links/menu items on left...
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#newpost">Author a Post</a></li>
+          </ul>
+          -->
+
+          <ul class="nav navbar-nav navbar-right">
+            <!-- Header, righthand section varies per page -->
+            {% block header_content %}
+            {% endblock %}
+          </ul>
+        </div>
+      </div><!--/.nav-collapse -->
+    </nav>
+
+    <!-- Middle section varies per page - no template -->
+    {% block main_content %}
+    {% endblock %}
+
+    <!-- Bottom Footer/Navigation Bar fixed across all pages -->
+    <footer class="footer">
+      <div class="container">
+        <!-- Navigation Bar Left Side Links -->
+        <ul class="nav navbar-nav text-muted">
+          <li class="active"><a href="https://sockduct.github.io" target="_blank">by James R. Small, Full Stack Engineer</a></li>
+          <!--li><a href="#thing2">Thing 2</a></li-->
+        </ul>
+
+        <!-- Navigation Bar Right Side Links -->
+        <ul class="nav navbar-nav navbar-right text-muted">
+          <!-- Footer, righthand section varies per page -->
+          {% block footer_content %}
+          {% endblock %}
+        </ul>
+      </div>
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script -->
+    <script src="/static/js/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <!-- script src="js/bootstrap.min.js"></script -->
+    <script src="/static/js/bootstrap.min.js"></script>
+  </body>
+</html>

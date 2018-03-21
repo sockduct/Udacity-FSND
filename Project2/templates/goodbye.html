@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+  <!-- Page specific CSS -->
+  {% block page_css %}
+    <link href="/static/css/welcome.css" rel="stylesheet">
+    <!-- meta http-equiv="refresh" content="3; URL='http://localhost:8080'" /-->
+    <meta http-equiv="refresh" content="3; URL='/'" />
+  {% endblock %}
+
+  {% block main_content %}
+    <div class="alert alert-info" role="alert"><h1>Goodbye, {{username}}!<h1></div>
+    <br>
+    <div class="alert alert-warning" role="alert">You will be automatically redirected to the main page in 3 seconds.</div>
+  {% endblock %}

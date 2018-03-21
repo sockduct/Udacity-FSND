@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+  <!-- Page specific CSS -->
+  {% block page_css %}
+    <link href="/static/css/sign.css" rel="stylesheet">
+  {% endblock %}
+
+  {% block header_content %}
+    <!-- Navigation Bar Right Side Links -->
+    <li class="active"><a href="/signup">I don't have an acccount! - Sign up</a></li>
+  {% endblock %}
+
+  {% block main_content %}
+    <div class="container">
+      <form class="form-signin" method="post">
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <label for="inputUsername" class="sr-only">Username</label>
+        <input type="text" id="inputUsername" name="username" class="form-control" placeholder="Username" value="{{username}}" required autofocus>
+        <span id="helpBlock1" class="help-block help-customize">{{username_error}}</span>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" value="{{password}}" required>
+        <span id="helpBlock2" class="help-block help-customize">{{password_error}}</span>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="auth_cookie" value="remember"> Remember me for 30 days
+          </label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <span id="helpBlock3" class="help-block help-customize">{{auth_error}}</span>
+      </form>
+    </div> <!-- /container -->
+  {% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+  {% block header_content %}
+    <!-- Navigation Bar Right Side Links -->
+    {% if userauth %}
+      <li class="active"><a href="#">Signed in as {{user}}</a></li>
+      <li><a href="/newpost">Author a Post</a>
+      </li>
+      <li><a href="/signout">Sign out</a></li>
+    {% else %}
+      <li><a href="/newpost">Author a Post</a></li>
+      <li><a href="/signup">Sign up</a></li>
+      <li class="active"><a href="/signin">Sign in</a></li>
+    {% endif %}
+  {% endblock %}
+
+  {% block main_content %}
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+      <div class="container">
+        <div class="col-md-6">
+          <img class="img-responsive img-rounded" src="/static/img/sunrise.jpg" alt="Sunrise">
+        </div>
+        <div class="col-md-6">
+          {% if bcount >= 1 %}
+            <h1><a href="/viewpost/{{blogs[0].key().id()}}">{{blogs[0].title}}</a></h1>
+            <span class="blog-post-meta">{{blogs[0].created.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{blogs[0].author}}</span>
+            <pre>{{blogs[0].content}}</pre>
+            <span>Tags:  {{blogs[0].tags}}</span>
+          {% else %}
+            <h1><a href="/newpost">Create the First Post!</a></h1>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        {% for blog in blogs %}
+          {% if loop.first %}
+            {% continue %}
+          {% else %}
+            <div class="col-md-6">
+              <h2><a class="content-title" href="/viewpost/{{blog.key().id()}}">{{blog.title}}</a></h2>
+              <div class="content-date">{{blog.created.strftime("%a %b %d, %Y at %H:%M:%S %z")}} UTC by {{blog.author}}</div>
+              <pre class="content-body">{{blog.content}}</pre>
+              <span>Tags:  {{blog.tags}}</span>
+              <!--p><a class="btn btn-default" href="#" role="button">View Post &raquo;</a></p-->
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endblock %}
+
+  {% block footer_content %}
+    <li><a href="#">Page last updated {{now}} UTC</a></li>
+    <li class="active"><a href="https://www.linkedin.com/in/jamesrsmall" target="_blank">About
+      <span class="sr-only">(current)</span></a>
+    </li>
+    <li><a href="https://www.linkedin.com/in/jamesrsmall" target="_blank">Contact</a></li>
+  {% endblock %}
