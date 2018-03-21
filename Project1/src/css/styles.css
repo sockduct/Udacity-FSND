@@ -1,0 +1,410 @@
+/* CSS - Basic Stylesheet for Grid Layout: */
+
+/* To Do:
+   * Check out BEM (Block, Element, Modifiers) naming style
+   * Fix Zocial font so loads from CDN or locally using below or similar
+*/
+
+/* Load zocial font locally - preferable to using web API call below because this service isn't
+   available via https which results in Chrome (and possible other browsers) blocking it.
+   <link rel="stylesheet" href="http://weloveiconfonts.com/api/?family=zocial">
+
+   Syntax from https://css-tricks.com/snippets/css/using-font-face/
+
+   But can't figure out how to get this to work...  :-(
+
+   Also, Udacity Style Guide says, "Do not use quotation marks in URI values (url())."  Does
+   that mean use single quotes or no quotes???
+*/
+@font-face {
+    font-family: "zocial";
+    src: url('../font/zocial/zocial-regular-webfont.eot'); /* IE9 Compat Modes */
+    src: url('../font/zocial/zocial-regular-webfont.woff') format('woff'), /* Pretty Modern Browsers */
+         url('../font/zocial/zocial-regular-webfont.ttf') format('truetype'), /* Safari, Android, iOS */
+         url('../font/zocial/zocial-regular-webfont.svg#svgFontName') format('svg'); /* Legacy iOS */
+    font-weight: normal;
+    font-style: normal;
+}
+
+header,
+footer,
+img,
+.main {
+    border: 1px solid #7d97ad;
+}
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.grid {
+    margin: 0 auto;
+    max-width: 1000px;
+    width: 100%;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.col-1 {
+    width: calc(100% / 12);
+}
+
+.col-2 {
+    width: calc(100% /12 * 2);
+}
+
+.col-3 {
+    width: calc(100% /12 * 3);
+}
+
+.col-4 {
+    width: calc(100% /12 * 4);
+}
+
+.col-5 {
+    width: calc(100% /12 * 5);
+}
+
+.col-6 {
+    width: calc(100% /12 * 6);
+}
+
+.col-7 {
+    width: calc(100% /12 * 7);
+}
+
+.col-8 {
+    width: calc(100% /12 * 8);
+}
+
+.col-9 {
+    width: calc(100% /12 * 9);
+}
+
+.col-10 {
+    width: calc(100% /12 * 10);
+}
+
+.col-11 {
+    width: calc(100% /12 * 11);
+}
+
+.col-12 {
+    width: 100%;
+}
+
+h1 {
+    color: blue;
+    margin-bottom: 0;
+}
+
+h2 {
+    padding-left:10px;
+}
+
+header,
+section {
+    font-family: "Roboto Slab", serif;
+}
+
+h3 {
+    /* Not using margin by itslef because only want to change top and bottom, not left or right */
+    margin-bottom: 0.2em;
+    margin-top: 0.15em;
+}
+
+.header-title {
+    margin-bottom: 1.25em;
+}
+
+hr {
+    border: solid 2px;
+    color:  #7d97ad;
+    height: 3px;
+    width: 100%;
+}
+
+/* To Do:
+iframe {
+    display: none;
+}
+// Can look at element queries to dynamically resize within available container space
+.flash-trailer-div {
+    margin: auto;
+    vertical-align: center;
+}
+*/
+
+header,
+footer,
+.main {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
+}
+
+footer {
+    font-family: "Roboto", sans-serif;
+    font-weight: 300;
+    /* Tried to shorten above to below but results in Chrome complaining about invalid property value:
+    font: 300, "Roboto", sans-serif; */
+}
+
+.header-text {
+    padding-left: 20px;
+    padding-right: 10px;
+    text-align: right;
+}
+
+.header-image-container {
+    position: relative;
+}
+
+.header-image {
+    bottom: 0;
+    margin: auto;
+    position: absolute;
+    top: 0;
+}
+
+/* Thought I needed this for image alignment, but doesn't seem like it now:
+.main {
+    display: block;
+}
+*/
+
+.projects {
+    text-align: center;
+}
+
+.project:not(:last-child) {
+    margin-bottom: 15px;
+}
+
+.project-title {
+    /* Not using margin by itslef because only want to change top and bottom, not left or right */
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.project-image {
+    max-width: 95%;
+}
+
+/* Based on example I found on the web but don't remember where */
+.project-image:hover{
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 0 0 30px 0 rgba(0, 255, 0, 0.67);
+    -moz-box-shadow:    0 0 30px 0 rgba(0, 255, 0, 0.67);
+    box-shadow:         0 0 30px 0 rgba(0, 255, 0, 0.67);
+}
+
+.project-link {
+    color: #000;
+    font-size: small;
+    line-height: 2em;
+    position: relative;
+    text-decoration: none;
+}
+
+.project-link:hover {
+    color: #000;
+}
+
+/* Based on example I found on the web but don't remember where */
+.project-link:before {
+    background-color: #000;
+    bottom: 0;
+    content: "";
+    height: 2px;
+    left: 0;
+    position: absolute;
+    visibility: hidden;
+    width: 100%;
+    -ms-transform: scaleX(0);
+    -webkit-transform: scaleX(0);
+    transform: scaleX(0);
+    -webkit-transition: all 0.3s ease-in-out 0s;
+    transition: all 0.3s ease-in-out 0s;
+}
+
+/* Based on example I found on the web but don't remember where */
+.project-link:hover:before {
+    visibility: visible;
+    -ms-transform: scaleX(1);
+    -webkit-transform: scaleX(1);
+    transform: scaleX(1);
+}
+
+img,
+embed,
+object,
+video {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+nav a,
+button {
+    min-height: 48px;
+    min-width: 48px;
+}
+
+.bottom {
+    margin-bottom: 25px;
+}
+
+.footer-sm {
+    /* TRouBLe - Top, Right, Bottom, Left */
+    margin: 0.25em auto 0.25em auto;
+    text-align: center;
+    width: 100%;
+}
+
+.footer-link {
+    /* color: #02b3e4; */
+    color: blue;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+}
+
+/* Zocial Icon Font Setup: */
+.zocial-github:before {content: "g";}
+.zocial-facebook:before {content: "f";}
+.zocial-linkedin:before {content: "L";}
+.zocial-twitter:before {content: "T";}
+
+[class*="zocial-"]:before {
+  color: black;
+  display: inline-block;
+  font-family: "zocial", sans-serif;
+  text-shadow: 3px 3px 3px #aaa;
+  width: 2em;
+}
+
+a:hover [class*="zocial-"]:before {
+  color: #3d85c6;
+}
+
+a {
+    text-decoration: none;
+}
+
+div#social a {
+  margin: 0 1em 0 0;
+}
+
+div#social a:last-of-type {
+  margin: 0;
+}
+
+div#social {
+  line-height: 2em;
+}
+
+/* Modal CSS based on example from w3schools.com */
+#fpeModal:hover {opacity: 0.8;}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 60%;
+}
+
+.modal-text {
+    padding-right: 25px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font: 28px bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+@media screen and (max-width: 499px) {
+    .modal-content {
+        width: 80%;
+    }
+    .project {
+        width: 100%;
+    }
+    .header-name {
+        font-size: 1.5em;
+    }
+    .header-title {
+        font-size: 1.0em;
+    }
+}
+
+@media screen and (min-width: 575px) {
+    .footer-sm {
+        width: 50%;
+    }
+}
+
+@media screen and (min-width: 500px) and (max-width: 799px) {
+    .project {
+        width: 50%;
+    }
+}
+
+@media screen and (min-width: 800px) and (max-width: 1000px) {
+    .project {
+        width: 33.33%;
+    }
+    .modal-content {
+        width: 55%;
+    }
+}
+
+@media screen and (min-width: 825px) {
+    .footer-sm {
+        width: 33.33%;
+    }
+}
+
+@media screen and (min-width: 1001px) {
+    .project {
+        width: 33.33%;
+    }
+    .modal-content {
+        width: 50%;
+    }
+    .footer-sm {
+        width: 25%;
+    }
+}

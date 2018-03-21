@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+<html>
+  <head lang="en">
+    <meta charset="utf-8">
+    <!-- /Below is HTML4.01 way, above is HTML5 way\ -->
+    <!--meta http-equiv="Content-Type" content="text/html; charset=windows-1252"-->
+
+    <!-- /Telling IE to use best engine available\ -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- /For mobile, how to display page when it loads\ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- To Do - Future consideration, for Android:
+    <meta name="theme-color" content="#db5945"-->
+
+    <title>Project 1 - My Portolio Site</title>
+
+    <!-- Include Favorite Icon -->
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png">
+
+    <!-- External Reference Section: -->
+    <!-- Fonts - For Multiple Google Fonts, replace "|" with "%7C" -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400%7CRoboto:300,400" rel="stylesheet">
+    <!-- Note:  Replaced with @font-face in CSS as this interface doesn't support https which results in Chrome and
+                possibly other browsers blocking it: -->
+    <!--link rel="stylesheet" href="http://weloveiconfonts.com/api/?family=zocial"-->
+    <!-- Not sure how to replace the above with a secure source such as a CDN - don't know how to
+         find something that hosts the zocial icon fonts -->
+
+    <!-- Cascading Style Sheets Section: -->
+    <!-- Order important here:
+         First apply framework
+         Then tweak (and possibly override) with our styles -->
+    <!-- The "minified" version removes whitespace and loads faster but harder to develop and debug with -->
+    <!--link rel="stylesheet" href="css/bootstrap.min.css"-->
+    <link rel="stylesheet" href="css/styles.css">
+    <!--Per Udacity FEND Style Guide - don't use type="text/css"-->
+    <!--link href="css/main.css" rel="stylesheet" type="text/css"-->
+
+    <!-- JavaScript Section: -->
+    <!-- Framework JavaScript Libraries
+         Mind dependencies - e.g., JQuery must appear first with Bootstrap -->
+    <!--script src="js/jquery-3.1.1.min.js"></script-->
+    <!--script src="js/bootstrap.min.js"></script-->
+    <script src="js/modal.js" defer></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="grid">
+        <header class="row">
+          <div class="col-3 header-image-container">
+            <img class="header-image" src="img/logo.png" alt="My Logo">
+          </div>
+
+          <div class="col-9 header-text">
+            <h1 class="header-name">James R. Small</h1>
+            <h3 class="header-title">Full Stack Engineer</h3>
+          </div>
+        </header>
+
+        <nav class="row top">
+          <hr>
+        </nav>
+
+        <section class="row main">
+          <!-- To Do - use iframe or modal:
+               Consider using element queries to make size relative
+          <div class="col-12 flash-trailer-div">
+            <iframe width="854" height="480" name="flash-trailer"
+              src="https://www.youtube.com/embed/Yj0l7iGKh8g">
+            </iframe>
+          </div>
+          -->
+          <!-- Note:  Using picture element because the pictures are different.  The -small
+                      picture is a cropped version for small screens, not just a different
+                      resolution.  From the link provided by the instructor (https://css-tricks.com/responsive-images-youre-just-changing-resolutions-use-srcset/), srcset
+                      appears more appropriate only if the images are the same. The course
+                      video the instructor left (https://www.udacity.com/course/viewer#!/c-ud882/l-3574748851/m-3888228996) results in a 404 error for me so I didn't get to
+                      watch that.  Please let me know if my thought here is wrong. -->
+          <picture class="col-12">
+            <source media="(max-width: 499px)"
+              srcset="img/Flash_Pipeline_Entrance-small.jpg">
+            <img id="fpeModal" src="img/Flash_Pipeline_Entrance.jpg" alt="Site Entrance">
+          </picture>
+
+          <!-- My Modal which includes regular paragraph text to meet the rubric! -->
+          <!-- Note: Not sure if JavaScript can handle "-" so using CamelCase -->
+          <!-- Modal based on example from w3schools.com - modal boxes/images -->
+          <div id="descrModal" class="modal">
+            <div class="modal-content">
+              <span class="close" onclick="document.getElementById('descrModal').style.display='none'">&times;</span>
+              <p class="modal-text">This is the entrace to the pipeline from The CW's The Flash TV Series. Highly
+                 recommended for viewing on treadmill runs from your tablet. After all, if Barry
+                 can run 100s of Miles Per Hour, what's the big deal about upping your speed another
+                 tenth of a MPH?</p>
+            </div>
+          </div>
+
+          <h2 class="col-12">Featured Work</h2>
+
+          <section class="row projects">
+            <div class="project">
+              <a href="movies.html">
+                <img class="project-image" src="img/movie-trailer.jpg" alt="Movie Trailers">
+              </a>
+              <h3 class="project-title">Movie Trailers</h3>
+              <a class="project-link" href="https://github.com/sockduct/UD036" target="_blank">GitHub.com/sockduct/UD036</a>
+            </div>
+
+            <div class="project">
+              <img class="project-image" src="img/question-mark-300w2.jpg" alt="Project 2">
+              <h3 class="project-title">Project 2</h3>
+              <a class="project-link" href="https://github.com/sockduct/TBD" target="_blank">GitHub.com/sockduct/TBD</a>
+            </div>
+
+            <div class="project">
+              <img class="project-image" src="img/question-mark-300w2.jpg" alt="Project 3">
+              <h3 class="project-title">Project 3</h3>
+              <a class="project-link" href="https://github.com/sockduct/TBD" target="_blank">GitHub.com/sockduct/TBD</a>
+            </div>
+          </section>
+        </section>
+
+        <div class="col-12 footer-sep">
+          <hr>
+        </div>
+
+        <footer class="row bottom">
+          <div class="social footer-sm">
+            <a href="https://www.linkedin.com/in/jamesrsmall" target="_blank" class="footer-link zocial-linkedin">Connect with me on LinkedIn</a>
+          </div>
+
+          <div class="social footer-sm">
+            <a href="https://github.com/sockduct?tab=repositories" target="_blank" class="footer-link zocial-github">Check out my GitHub Repos</a>
+          </div>
+
+          <div class="social footer-sm">
+            <a href="https://www.facebook.com/public/james.small.372" target="_blank" class="footer-link zocial-facebook">Follow me on Facebook</a>
+          </div>
+
+          <div class="social footer-sm">
+            <a href="https://twitter.com/sockduct" target="_blank" class="footer-link zocial-twitter">Follow me on Twitter</a>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>

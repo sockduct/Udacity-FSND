@@ -1,0 +1,68 @@
+/* CSS */
+* {
+    box-sizing: border-box;
+}
+
+.box {
+    background-color: #CCC;
+    margin-bottom: 10px;
+    min-height: 50px;
+}
+
+/* Generate easter colors!!! */
+
+.box1 {
+    background-color: #FCC;
+    /*
+    margin-left: 50px;
+    padding-left: 50px;
+    border: 3px solid blue;
+    width: 300px;
+    height: 100px;
+    overflow | overflow-x | overflow-y: scroll;
+    /* Note:  If you both margin-left and margin-right auto, then centers */
+    margin-left: auto; /* Make left margin as big as possible */
+    margin-right: auto; /* Make right margin as big as possible */
+    margin: auto; /* But, if want to center, just use margin: auto */
+    /* Can also do margin: 0 auto; Not sure how this is different */
+    /* Supposedly this sets top/bottom margins to 0 and left/right margins to auto,
+       but don't see difference from margin: auto */
+    */
+    /*
+    float: left;
+    */
+}
+
+.box2 {
+    background-color: #CFC;
+    /*
+    width: 150px;
+    height: 150px;
+    float: left | right;
+    */
+}
+
+.box3 {
+    background-color: #CCF;
+}
+
+.box4 {
+    background-color: #FFC;
+}
+
+.box5 {
+    background-color: #FCF;
+}
+
+.box6 {
+    background-color: #CCC;
+}
+
+.box7 {
+    background-color: #CFF;
+}
+
+.box8 {
+    background-color: #FFF;
+}
+
