@@ -1,0 +1,109 @@
+/*
+ * Based on dashboard template from Bootstrap Project
+ */
+
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+.sidebar {
+  /* display: none; */
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 200px;
+  z-index: 1000;
+  display: block;
+  padding: 20px;
+  overflow-x: hidden;
+  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  background-color: #f5f5f5;
+  border-right: 1px solid #eee;
+  margin-left: -150px;
+  transition: all 0.3s;
+}
+
+.sidebar.active {
+    margin-left: 0px;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    margin-left: 0;
+  }
+  .sidebar.active {
+    margin-left: -150px;
+  }
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  margin-right: -21px; /* 20px padding + 1px border */
+  margin-bottom: 20px;
+  margin-left: -20px;
+}
+
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: #428bca;
+}
+
+/* Fix issue with Chrome using Bootstrap to show cancel option
+   in input box of type search */
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: searchfield-cancel-button;
+}
+
+/* Don't use horizontal scrollbar in Google Maps InfoWindows */
+#info-window {
+  overflow: hidden !important;
+}
+
+#filter-text {
+  margin-left: 10px;
+  width: 160px;
+}
+
+#wide-space {
+  /* Max for Chrome is 62px */
+  letter-spacing: 35px;
+}
+
+/*
+ * Main content - Google Map
+ */
+
+/* Fix left offset with media queries... */
+#map {
+  /* bottom:0px; */
+  height: 100%;
+  /* width: 100%;  Don't use width or get horizontal scrollbar... */
+  left: 50px;
+  right: 0;
+  position: absolute;
+}
+
+#map.active {
+  left: 200px;
+}
+
+@media (min-width: 768px) {
+  #map {
+    /*position: fixed;
+    top: 0;
+    bottom: 0;*/
+    left: 200px;
+  }
+  #map.active {
+    left: 50px;
+  }
+}

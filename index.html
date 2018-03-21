@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Map of Wixom, MI, USA with Points of Interest">
+    <meta name="author" content="James R. Small">
+    <link rel="icon" href="img/favicon.ico">
+
+    <title>Wixom, Michigan, USA</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="css/dashboard.css" rel="stylesheet" type="text/css">
+    <!-- Use defer option so scripts load aysnchronously and execute after DOM fully loaded -->
+    <!--script defer src="js/jquery-3.2.1.min.js"></script>
+    <script defer src="js/bootstrap.min.js"></script>
+    <script defer src="js/knockout-3.4.2.js"></script>
+    <script defer src="js/wixom-map.js"></script>
+    <script defer src="js/keys.js"></script-->
+    <!-- Note:  Loading places library - used in wixom-app.js
+                Load after wixom-app.js since it's using callbacks defined there -->
+    <!--script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=app.initMap&libraries=places" onerror="app.initMapError()"></script-->
+  </head>
+  <body>
+    <div class="container-fluid">
+      <nav class="sidebar">
+        <!-- Sidebar header -->
+        <ul class="nav nav-sidebar">
+          <li data-bind="visible: showNavElmts"><a href="">Wixom, Michigan, USA</a></li>
+          <li class="active" id="sidebarCollapse" data-bind="click: toggleNavBar"><a href="">Points of Interest<span id="wide-space"> </span><i class="glyphicon glyphicon-menu-hamburger"></i></a></li>
+          <!-- Button to toggle sidebar open/closed -->
+          <!--button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
+            <i class="glyphicon glyphicon-menu-hamburger"></i>
+            Toggle
+          </button-->
+        </ul>
+        <ul class="nav nav-sidebar" data-bind="visible: showNavElmts">
+          <form class="form-inline" action="#">
+            <div class="form-group">
+              <label class="sr-only" for="inputFilter">Filter Text</label>
+              <!-- Note:  Added the input event listener because the "subscribe" functionality
+                          doesn't work when the user clears the text by clicking on the "X" -->
+              <input type="search" id="filter-text" class="form-control" placeholder="Filter, e.g., Vista" autocomplete="off" autofocus data-bind="value: filterText, valueUpdate: 'keyup', event: {input: populatePoiList}">
+            </div>
+          </form>
+        </ul>
+        <ul class="nav nav-sidebar" data-bind="foreach: poiList, visible: showNavElmts">
+          <!-- li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li -->
+          <li><a href="#" data-bind="click: $parent.updateCurrentPoi, text: title"></a></li>
+        </ul>
+      </nav>
+
+      <main>
+        <!-- A div with the id of "map" is used by Google Maps -->
+        <div id="map"></div>
+      </main>
+    </div>
+
+    <!-- Knockout Template -->
+    <script type="text/html" id="info-window-template">
+      <!-- $data[0] = Title -->
+      <strong data-bind="text: $data.title"></strong>
+      <!-- $data[1] = Object with Google Places Info -->
+      <span data-bind="if: $data.place.formatted_address"><br><span data-bind="text: $data.place.formatted_address"></span></span>
+      <span data-bind="if: $data.place.formatted_phone_number"><br><span data-bind="text: $data.place.formatted_phone_number"></span></span>
+      <span data-bind="if: $data.place.website"><br><span data-bind="html: $data.place.website"></span></span>
+      <div data-bind="if: $data.place.opening_hours"><br><strong>Hours:</strong><br>
+        <span data-bind="foreach: $data.place.opening_hours.weekday_text">
+          <li data-bind="text: $data"></li>
+        </span>
+      </div>
+      <span data-bind="if: $data.place.error"><br><br><em>Unable to load data from Google Maps, Places API</em></span>
+      <!-- $data[2] = Flickr Current Photo/Place Holder -->
+      <br><img data-bind="attr: {src: $data.photoSrc, alt: $data.photoAlt}"></img>
+      <!-- Add Flickr Photo Attribution if Photo(s) found and loaded -->
+      <div data-bind="visible: $data.showCredit">Source:  Flickr Photo API</div>
+      <!-- If more than one Flickr Photo add Next/Prev buttons -->
+      <div data-bind="visible: $data.showPhotoCtl">
+        <br><button type="button" data-bind="click: $root.flickrPrevPhoto, disable: $data.photoIndex() === 0">Prev</button> Flickr Photo <span data-bind="text: $data.photoIndex() + 1"></span> of <span data-bind="text: $data.photoTotal"></span> <button type="button" data-bind="click: $root.flickrNextPhoto, disable: $data.photoIndex() + 1 === Number($data.photoTotal())">Next</button>
+      </div>
+    </script>
+
+    <!-- Load scripts here per Udacity Request -->
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/knockout-3.4.2.js"></script>
+    <script src="js/wixom-map.js"></script>
+    <script src="js/keys.js"></script>
+    <!-- Note:  Loading places library - used in wixom-app.js
+                Load after wixom-app.js since it's using callbacks defined there -->
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvkw6h0gyz5ypm5WtT2GyRXhyZC9hLEXM&v=3&callback=app.initMap&libraries=places" onerror="app.initMapError()"></script>
+  </body>
+</html>
