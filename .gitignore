@@ -1,0 +1,8 @@
+# Files git should ignore
+
+# Vim swap files
+*.swp
+
+# Compiled Python modules
+*.pyc
+

@@ -64,5 +64,5 @@ Path | Main Methods
 Note:  For pages that require authentication, if the user isn't authenticated he will be redirected to /signin
 
 ### License
-MIT License
+[MIT License](LICENSE)
 

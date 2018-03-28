@@ -1,6 +1,12 @@
-*.pyc
+# Don't upload App Secrets file
 app_secret.json
+
+# Don't upload SQLite database
 catalog.db
+
+# Don't upload Google Secrets file
 client_secret_google.json
+
+# Don't upload examples directory
 examples/
 

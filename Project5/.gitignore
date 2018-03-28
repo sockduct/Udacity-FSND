@@ -1,5 +1,10 @@
+# Don't upload local Node preferences file
 .eslintrc.js
-js/keys.js
-tmp*/*
 wixom-map.jshint.txt
+
+# Don't upload App Secrets file
+js/keys.js
+
+# Don't upload temp files/directory
+tmp*/*
 

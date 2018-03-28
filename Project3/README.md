@@ -1,4 +1,4 @@
-# Log Analysis Project w/ PostgreSQL
+# Log Analysis Project with PostgreSQL
 ## Project 3
 
 ### Project Purpose
@@ -38,8 +38,8 @@ This project uses a PostgreSQL database.  The database is initialized with an au
   * main - if program run directly, execute print... functions from above which answer questions, if optional "test" argument passed then use alternate function invocation to test function's other branches
 
 ### Example Project Output
-* output.txt
+* [output.txt](output.txt)
 
 ### License
-MIT License
+[MIT License](LICENSE)
 

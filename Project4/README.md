@@ -1,4 +1,4 @@
-# Item Catalog Application Project
+# Item Catalog (Web) Application Project
 ## Project 4
 
 ### Project Purpose and Notes
@@ -73,5 +73,5 @@ Note:  The web application uses [Bootstrap v3.x](https://getbootstrap.com/docs/3
   ![API Access to Catalog Home Using Postman](API_Example.png)
 
 ### License
-[MIT License](license.txt)
+[MIT License](LICENSE)
 
