@@ -8,7 +8,7 @@ This project is to build a portfolio website. Using the provided [design mockup]
 
 ### Installation and Requirements
 * Setup a web server to host everything under the [src](src) directory
-    * For additional details on setting up a web server, please refer to [Project 6](..\Project6)
+    * For additional details on setting up a web server, please refer to [Project 6](../Project6)
 
 ### Project Requirements/Solution Layout
 * [Design Mockup/Site Template](design-mockup-portfolio.pdf)
